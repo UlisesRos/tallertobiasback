@@ -38,7 +38,7 @@ app.get('/', (req, res) => {
     res.send('Servidor funcionando correctamente.')
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.DB_PORT || 5000;
 // Sincronizar los modelos con la base de datos y luego iniciar el servidor.
 sequelize.sync({ force: false })
 .then(() => {
