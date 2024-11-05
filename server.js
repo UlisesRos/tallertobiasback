@@ -12,14 +12,7 @@ require('dotenv').config();
 connectDB();
 
 const app = express();
-app.use(cors({
-    origin: [
-        'https://tallertobias.vercel.app/',  // URL de producción en Vercel
-        'http://localhost:3000'                           // Para desarrollo local
-    ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],             // Métodos permitidos
-    credentials: true                                      // Para enviar cookies si es necesario
-}));
+app.use(cors());
 
 // Ejecutando la tarea programada para whatssap
 iniciarCronJobs()
