@@ -11,7 +11,7 @@ const client = twilio(accountSid, authToken);
 
 const iniciarCronJobs = () => {
 
-    cron.schedule('0 9 * * *', async () => {
+    cron.schedule('* * * * *', async () => {
         try {
             console.log('Iniciando tarea de actualizacion de proximoServicio');
             const registros = await Cliente.findAll({
@@ -35,7 +35,7 @@ const iniciarCronJobs = () => {
                     client.messages.create({
                         body: `¡${registro.nombre} necesita un nuevo Servicio! Contactate con el para acordar un nuevo turno. Su celular es ${registro.telefono}`,
                         from: 'whatsapp:+14155238886',
-                        to: 'whatsapp:+5493417539870'
+                        to: 'whatsapp:+5493413632945'
                     })
                     .then((message) => console.log(`Mensaje enviado con ID: ${message.sid}`))
                     .catch((error) => console.error('Error al enviar el mensaje:', error))
