@@ -12,19 +12,19 @@ const Servicio = sequelize.define('Servicio', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    fechaRecepcion: {
-        type: DataTypes.DATE,
-        allowNull: false
-    },
     fechaEntrega: {
         type: DataTypes.DATE,
-        allowNull: true
+        allowNull: false
     },
     monto: {
         type: DataTypes.STRING,
         allowNull: false
     },
     proximoServicio: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    descripcionProximoServicio: {   
         type: DataTypes.STRING,
         allowNull: true
     },
