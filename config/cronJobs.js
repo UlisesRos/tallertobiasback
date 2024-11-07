@@ -2,7 +2,6 @@ const cron = require('node-cron');
 const Cliente = require('../models/Cliente')
 const twilio = require('twilio');
 const Servicio = require('../models/Servicio');
-const Moto = require('../models/Moto');
 require('dotenv').config()
 
 // Configuracion de Twilio
@@ -34,15 +33,15 @@ const iniciarCronJobs = () => {
                     registro.Servicios[0].proximoServicio = 'Realizar Proximo Servicio'
 
                     client.messages.create({
-                        body: `¡${registro.nombre} necesita un nuevo Servicio. Contactate con el para acordar un nuevo turno. Su celular es ${registro.telefono}`,
+                        body: `El cliente ${registro.nombre} necesita un nuevo servicio. Contactate con él a su celular ${registro.telefono}. Muchas Gracias`,
                         from: 'whatsapp:+14155238886',
                         to: 'whatsapp:+5493413632945'
                     })
                     .then((message) => console.log(`Mensaje enviado con ID: ${message.sid}`))
                     .catch((error) => console.error('Error al enviar el mensaje:', error))
 
-                    await registro.Servicios[0].save()
-                }
+                    registro.Servicios[0].save()
+                }   
             });
             console.log('Tarea de actualizacion completada')
         } catch (error) {
