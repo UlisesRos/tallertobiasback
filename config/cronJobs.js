@@ -2,6 +2,7 @@ const cron = require('node-cron');
 const Cliente = require('../models/Cliente')
 const twilio = require('twilio');
 const Servicio = require('../models/Servicio');
+const Moto = require('../models/Moto');
 require('dotenv').config()
 
 // Configuracion de Twilio
@@ -11,13 +12,16 @@ const client = twilio(accountSid, authToken);
 
 const iniciarCronJobs = () => {
 
-    cron.schedule('0 9 * * *', async () => {
+    cron.schedule('* * * * *', async () => {
         try {
             console.log('Iniciando tarea de actualizacion de proximoServicio');
             const registros = await Cliente.findAll({
                 include: [
                     {
                         model: Servicio
+                    },
+                    {
+                        model: Moto
                     }
                 ]
             });
