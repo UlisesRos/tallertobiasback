@@ -34,7 +34,7 @@ const iniciarCronJobs = () => {
                     registro.Servicios[0].proximoServicio = 'Realizar Proximo Servicio'
 
                     client.messages.create({
-                        body: `¡${registro.nombre} necesita un nuevo Servicio: ${registro.Servicios[0].descripcionProximoServicio}. Contactate con el para acordar un nuevo turno. Su celular es ${registro.telefono}`,
+                        body: `¡${registro.nombre} necesita un nuevo Servicio. Contactate con el para acordar un nuevo turno. Su celular es ${registro.telefono}`,
                         from: 'whatsapp:+14155238886',
                         to: 'whatsapp:+5493413632945'
                     })
