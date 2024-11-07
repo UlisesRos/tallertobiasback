@@ -12,7 +12,7 @@ const client = twilio(accountSid, authToken);
 
 const iniciarCronJobs = () => {
 
-    cron.schedule('* * * * *', async () => {
+    cron.schedule('0 11 * * *', async () => {
         try {
             console.log('Iniciando tarea de actualizacion de proximoServicio');
             const registros = await Cliente.findAll({
@@ -44,7 +44,7 @@ const iniciarCronJobs = () => {
                     .then((message) => console.log(`Mensaje enviado con ID: ${message.sid}`))
                     .catch((error) => console.error('Error al enviar el mensaje:', error))
 
-                    registro.Servicios[0].save()
+                    await registro.Servicios[0].save()
                 }
             });
             console.log('Tarea de actualizacion completada')
