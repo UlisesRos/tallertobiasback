@@ -12,16 +12,13 @@ const client = twilio(accountSid, authToken);
 
 const iniciarCronJobs = () => {
 
-    cron.schedule('0 11 * * *', async () => {
+    cron.schedule('* * * * *', async () => {
         try {
             console.log('Iniciando tarea de actualizacion de proximoServicio');
             const registros = await Cliente.findAll({
                 include: [
                     {
                         model: Servicio
-                    },
-                    {
-                        model: Moto
                     }
                 ]
             });
@@ -37,7 +34,7 @@ const iniciarCronJobs = () => {
                     registro.Servicios[0].proximoServicio = 'Realizar Proximo Servicio'
 
                     client.messages.create({
-                        body: `¡${registro.nombre} necesita un nuevo Servicio: ${registro.Servicios[0].descripcionProximoServicio}. La moto ingreso con ${registro.Motos[0].km}. Contactate con el para acordar un nuevo turno. Su celular es ${registro.telefono}`,
+                        body: `¡${registro.nombre} necesita un nuevo Servicio: ${registro.Servicios[0].descripcionProximoServicio}. Contactate con el para acordar un nuevo turno. Su celular es ${registro.telefono}`,
                         from: 'whatsapp:+14155238886',
                         to: 'whatsapp:+5493413632945'
                     })
