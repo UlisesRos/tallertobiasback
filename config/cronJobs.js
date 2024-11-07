@@ -38,8 +38,8 @@ const iniciarCronJobs = () => {
                         template: 'taller_tobias',
                         body: {
                             1: registro.nombre,
-                            2: registro.telefono,
                             3: registro.Servicios[0].descripcionProximoServicio,
+                            2: registro.telefono,
                         }
                     })
                     .then((message) => console.log(`Mensaje enviado con ID: ${message.sid}`))
