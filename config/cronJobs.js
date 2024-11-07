@@ -12,7 +12,7 @@ const client = twilio(accountSid, authToken);
 
 const iniciarCronJobs = () => {
 
-    cron.schedule('0 11 * * *', async () => {
+    cron.schedule('* * * * *', async () => {
         try {
             console.log('Iniciando tarea de actualizacion de proximoServicio');
             const registros = await Cliente.findAll({
