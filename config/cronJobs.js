@@ -33,9 +33,14 @@ const iniciarCronJobs = () => {
                     registro.Servicios[0].proximoServicio = 'Realizar Proximo Servicio'
 
                     client.messages.create({
-                        body: `El cliente ${registro.nombre} necesita un nuevo servicio. Tenes que hacerle: ${registro.Servicios[0].descripcionProximoServicio}. Contactate con él a su celular ${registro.telefono}. Muchas Gracias`,
                         from: 'whatsapp:+14155238886',
-                        to: 'whatsapp:+5493413632945'
+                        to: 'whatsapp:+5493413632945',
+                        template: 'taller_tobias',
+                        body: {
+                            1: registro.nombre,
+                            2: registro.telefono,
+                            3: registro.Servicios[0].descripcionProximoServicio,
+                        }
                     })
                     .then((message) => console.log(`Mensaje enviado con ID: ${message.sid}`))
                     .catch((error) => console.error('Error al enviar el mensaje:', error))
