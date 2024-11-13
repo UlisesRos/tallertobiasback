@@ -24,6 +24,11 @@ const iniciarCronJobs = () => {
 
             registros.forEach(async (registro) => {
 
+                if(!registro) {
+                    console.log('No hay ningun dato para indagar');
+                    return
+                }
+
                 if(registro.Servicios[0].proximoServicio > 0) {
                     registro.Servicios[0].proximoServicio -= 1;
                     await registro.Servicios[0].save();
