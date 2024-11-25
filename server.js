@@ -4,6 +4,7 @@ const clienteRouter = require('./routes/api/clienteRouter')
 const motoRouter = require('./routes/api/motoRouter')
 const servicioRouter = require('./routes/api/servicioRouter')
 const registroCompletoRouter = require('./routes/registroCompletoRouter')
+const turnoRouter = require('./routes/turnoRouter')
 const cors = require('cors')
 const iniciarCronJobs = require('./config/cronJobs')
 require('dotenv').config();
@@ -32,6 +33,9 @@ app.use('/api', servicioRouter)
 
 // Ruta de registro completo
 app.use('/', registroCompletoRouter)
+
+// Ruta de turnos
+app.use('/', turnoRouter)
 
 // Ruta para verificar si el servidor esta en funcionamiento
 app.get('/', (req, res) => {
