@@ -1,13 +1,17 @@
 const cron = require('node-cron');
 const Cliente = require('../models/Cliente')
-const twilio = require('twilio');
 const Servicio = require('../models/Servicio');
+const nodemailer = require('nodemailer')
 require('dotenv').config()
 
-// Configuracion de Twilio
-const accountSid = process.env.TW_ACCOUNTSID
-const authToken = process.env.TW_AUTHTOKEN
-const client = twilio(accountSid, authToken);
+// Configuracion de nodemailer
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
 
 const iniciarCronJobs = () => {
 
@@ -35,17 +39,28 @@ const iniciarCronJobs = () => {
                 };
 
                 if(registro.Servicios[0].proximoServicio === 0){
-                    registro.Servicios[0].proximoServicio = 'Realizar Proximo Servicio'
+                    registro.Servicios[0].proximoServicio = 0
 
-                    console.log(registro.Servicios[0].descripcionProximoServicio)
+                    // Configurar contenido del mail
+                    const mailOptions = {
+                        from: process.env.EMAIL_USER,
+                        to: "tallertobias@outlook.com",
+                        subject: `RECORDATORIO DE SERVICIO PARA ${registro.nombre}`,
+                        text: `El cliente ${registro.nombre} necesita un proximo servicio.
+                        La moto es ${registro.Motos[0].marca} ${registro.Motos[0].modelo}.
+                        El servicio que hay que realizarle es el siguiente: ${registro.Servicios[0].descripcionProximoServicio}.
+                        Este es el celular del cliente para comunicarte con el: ${registro.telefono}.
+                        Muchas Gracias!` 
+                    };
 
-                    client.messages.create({
-                        from: 'whatsapp:+14155238886',
-                        to: 'whatsapp:+5493413632945',
-                        body: `El cliente ${registro.nombre} necesita un nuevo Servicio. Servicio a realizar: ${registro.Servicios[0].descripcionProximoServicio}. Comunicate a su Celular para contactar con el: ${registro.telefono}`
-                    })
-                    .then((message) => console.log(`Mensaje enviado con ID: ${message.sid}`))
-                    .catch((error) => console.error('Error al enviar el mensaje:', error))
+                    // Enviar el correo
+                    transporter.sendMail(mailOptions, (error, info) => {
+                        if (error) {
+                            console.error('Error al enviar el correo:', error);
+                        } else {
+                            console.log(`Correo enviado: ${info.response}`);
+                        }
+                    });
 
                     registro.Servicios[0].save()
                 }   
