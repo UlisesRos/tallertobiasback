@@ -20,16 +20,6 @@ const Servicio = sequelize.define('Servicio', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    pago: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: '0'
-    },
-    deuda: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: '0'
-    },
     proximoServicio: {
         type: DataTypes.STRING,
         allowNull: true
@@ -53,12 +43,5 @@ const Servicio = sequelize.define('Servicio', {
 
 Cliente.hasMany(Servicio, { foreignKey: 'clienteId' });
 Servicio.belongsTo(Cliente, { foreignKey: 'clienteId' });
-
-// Hook para calcular deuda antes de guardar
-Servicio.beforeSave((servicio) => {
-    const monto = parseFloat(servicio.monto) || 0; // Convertir monto a número
-    const pago = parseFloat(servicio.pago) || 0;   // Convertir pago a número
-    servicio.deuda = (monto - pago).toString();    // Calcular deuda y guardar como string
-});
 
 module.exports = Servicio
