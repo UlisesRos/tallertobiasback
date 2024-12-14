@@ -3,7 +3,15 @@ const Servicio = require('../models/Servicio');
 // Agregar un nuevo servicio
 const postServicio = async (req, res) => {
     try {
-        const servicio = await Servicio.create(req.body);
+        const { pago, monto } = req.body
+
+        const deuda = monto - pago 
+
+        const servicio = await Servicio.create({
+            ...req.body,
+            deuda
+        });
+
         res.status(201).json(servicio)
     } catch (error) {
         res.status(400).json({ error: error.message})
@@ -20,4 +28,31 @@ const getServicios = async (req, res) => {
     }
 }
 
-module.exports = { postServicio, getServicios }
+// Editar servicio
+const updateServicio = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { pago } = req.body;
+
+        // Obtener el servicio actual
+        const servicio = await Servicio.findByPk(id);
+        if (!servicio) {
+            return res.status(404).json({ error: 'Servicio no encontrado' });
+        }
+
+        // Calcular nueva deuda
+        const deuda = servicio.monto - pago;
+
+        // Actualizar el servicio
+        await servicio.update({
+            ...req.body,
+            deuda
+        });
+
+        res.status(200).json(servicio);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+module.exports = { postServicio, getServicios, updateServicio }

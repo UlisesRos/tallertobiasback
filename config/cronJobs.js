@@ -16,7 +16,7 @@ const transporter = nodemailer.createTransport({
 
 const iniciarCronJobs = () => {
 
-    cron.schedule('*/2 * * * *', async () => {
+    cron.schedule('0 10 * * *', async () => {
         try {
             console.log('Iniciando tarea de actualizacion de proximoServicio');
             const registros = await Cliente.findAll({
@@ -37,10 +37,10 @@ const iniciarCronJobs = () => {
                     return
                 }
 
-                /*if(registro.Servicios[0].proximoServicio > 0) {
+                if(registro.Servicios[0].proximoServicio > 0) {
                     registro.Servicios[0].proximoServicio -= 1;
                     await registro.Servicios[0].save();
-                };*/
+                };
 
                 if(parseInt(registro.Servicios[0].proximoServicio, 10) === 0){
                     registro.Servicios[0].proximoServicio = -1
