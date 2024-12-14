@@ -1,6 +1,7 @@
 const cron = require('node-cron');
 const Cliente = require('../models/Cliente')
 const Servicio = require('../models/Servicio');
+const Moto = require('../models/Moto')
 const nodemailer = require('nodemailer')
 require('dotenv').config()
 
@@ -15,13 +16,16 @@ const transporter = nodemailer.createTransport({
 
 const iniciarCronJobs = () => {
 
-    cron.schedule('0 10 * * *', async () => {
+    cron.schedule('*/2 * * * *', async () => {
         try {
             console.log('Iniciando tarea de actualizacion de proximoServicio');
             const registros = await Cliente.findAll({
                 include: [
                     {
                         model: Servicio
+                    },
+                    {
+                        model: Moto
                     }
                 ]
             });
@@ -33,13 +37,13 @@ const iniciarCronJobs = () => {
                     return
                 }
 
-                if(registro.Servicios[0].proximoServicio > 0) {
+                /*if(registro.Servicios[0].proximoServicio > 0) {
                     registro.Servicios[0].proximoServicio -= 1;
                     await registro.Servicios[0].save();
-                };
+                };*/
 
                 if(registro.Servicios[0].proximoServicio === 0){
-                    registro.Servicios[0].proximoServicio = 0
+                    registro.Servicios[0].proximoServicio = -1
 
                     // Configurar contenido del mail
                     const mailOptions = {
