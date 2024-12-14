@@ -42,7 +42,7 @@ const iniciarCronJobs = () => {
                     await registro.Servicios[0].save();
                 };*/
 
-                if(registro.Servicios[0].proximoServicio === 0){
+                if(parseInt(registro.Servicios[0].proximoServicio, 10) === 0){
                     registro.Servicios[0].proximoServicio = -1
 
                     // Configurar contenido del mail
