@@ -76,4 +76,72 @@ const iniciarCronJobs = () => {
     })
 };
 
-module.exports = iniciarCronJobs
+const deudaCronJobs = () => {
+    // Programa la tarea para el 1° de cada mes a las 10:00 AM
+    cron.schedule('0 10 1 * *', async () => {
+        try {
+            console.log('Iniciando tarea de notificación de clientes con deuda...');
+
+            // Busca los clientes que tienen servicios con deuda > 0
+            const clientesConDeuda = await Cliente.findAll({
+                include: [
+                    {
+                        model: Servicio,
+                        where: {
+                            deuda: {
+                                [Sequelize.Op.gt]: 0 // deuda > 0
+                            }
+                        }
+                    },
+                    { model: Moto } // Incluye también la moto si es necesario
+                ]
+            });
+
+            // Verifica si hay clientes con deuda
+            if (clientesConDeuda.length === 0) {
+                console.log('No hay clientes con deuda.');
+                return;
+            }
+
+            // Construye el cuerpo del correo con los datos de los clientes
+            let cuerpoCorreo = 'Lista de clientes con deuda:\n\n';
+            clientesConDeuda.forEach((cliente, index) => {
+                cliente.Servicios.forEach((servicio) => {
+                    cuerpoCorreo += `
+                    ${index + 1}. Cliente: ${cliente.nombre}
+                    Teléfono: ${cliente.telefono}
+                    Deuda: $${servicio.deuda}
+                    Servicio: ${servicio.descripcionProximoServicio || 'Sin descripción'}
+                    Moto: ${cliente.Motos[0]?.marca || 'Sin datos'} ${cliente.Motos[0]?.modelo || ''}
+                    -------------------------------------------
+                    `;
+                });
+            });
+
+            // Configurar contenido del mail
+            const mailOptions = {
+                from: process.env.EMAIL_USER,
+                to: "tallertobias@outlook.com", // Cambia por tu correo
+                subject: "Clientes con deuda pendiente",
+                text: cuerpoCorreo
+            };
+
+            // Enviar el correo
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.error('Error al enviar el correo:', error);
+                } else {
+                    console.log(`Correo enviado exitosamente: ${info.response}`);
+                }
+            });
+
+            console.log('Tarea de notificación completada.');
+
+        } catch (error) {
+            console.error('Error en la tarea programada de clientes con deuda:', error);
+        }
+    });
+};
+
+
+module.exports = {iniciarCronJobs, deudaCronJobs}
