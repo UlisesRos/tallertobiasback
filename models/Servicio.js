@@ -17,7 +17,7 @@ const Servicio = sequelize.define('Servicio', {
         allowNull: false
     },
     monto: {
-        type: DataTypes.STRING,
+        type: DataTypes.FLOAT,
         allowNull: false
     },
     pago: {

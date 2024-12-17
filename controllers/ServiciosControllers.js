@@ -5,7 +5,7 @@ const postServicio = async (req, res) => {
     try {
         const { pago, monto } = req.body
 
-        const deuda = monto - pago 
+        const deuda = parseInt(monto, 10) - pago 
 
         const servicio = await Servicio.create({
             ...req.body,
@@ -41,7 +41,7 @@ const updateServicio = async (req, res) => {
         }
 
         // Calcular nueva deuda
-        const deuda = servicio.monto - pago;
+        const deuda = parseInt(servicio.monto, 10) - pago;
 
         // Actualizar el servicio
         await servicio.update({
