@@ -35,7 +35,7 @@ const updateServicio = async (req, res) => {
         const { pago } = req.body;
 
         // Obtener el servicio actual
-        const servicio = await Servicio.findAll({ where: { clienteId: id }});
+        const servicio = await Servicio.findOne({ where: { clienteId: id }});
         if (!servicio) {
             return res.status(404).json({ error: 'Servicio no encontrado' });
         }
