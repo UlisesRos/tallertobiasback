@@ -3,6 +3,7 @@ const Cliente = require('../models/Cliente')
 const Servicio = require('../models/Servicio');
 const Moto = require('../models/Moto')
 const nodemailer = require('nodemailer')
+const Sequelize = require('sequelize')
 require('dotenv').config()
 
 // Configuracion de nodemailer
@@ -50,10 +51,11 @@ const iniciarCronJobs = () => {
                         from: process.env.EMAIL_USER,
                         to: "tallertobias@outlook.com",
                         subject: `RECORDATORIO DE SERVICIO PARA ${registro.nombre}`,
-                        text: `El cliente ${registro.nombre} necesita un proximo servicio.
-                        La moto es ${registro.Motos[0].marca} ${registro.Motos[0].modelo}.
-                        El servicio que hay que realizarle es el siguiente: ${registro.Servicios[0].descripcionProximoServicio}.
-                        Este es el celular del cliente para comunicarte con el: ${registro.telefono}.
+                        text: `
+                        El cliente ${registro.nombre} necesita un proximo servicio.
+                        Moto: ${registro.Motos[0].marca} ${registro.Motos[0].modelo}.
+                        Descripcion del servicio a realizar: ${registro.Servicios[0].descripcionProximoServicio}.
+                        Celular del cliente: ${registro.telefono}.
                         Muchas Gracias!` 
                     };
 
@@ -103,7 +105,6 @@ const deudaCronJobs = () => {
                 return;
             }
 
-            // Construye el cuerpo del correo con los datos de los clientes
             let cuerpoCorreo = 'Lista de clientes con deuda:\n\n';
             clientesConDeuda.forEach((cliente, index) => {
                 cliente.Servicios.forEach((servicio) => {
@@ -111,7 +112,6 @@ const deudaCronJobs = () => {
                     ${index + 1}. Cliente: ${cliente.nombre}
                     Teléfono: ${cliente.telefono}
                     Deuda: $${servicio.deuda}
-                    Servicio: ${servicio.descripcionProximoServicio || 'Sin descripción'}
                     Moto: ${cliente.Motos[0]?.marca || 'Sin datos'} ${cliente.Motos[0]?.modelo || ''}
                     -------------------------------------------
                     `;
@@ -121,7 +121,7 @@ const deudaCronJobs = () => {
             // Configurar contenido del mail
             const mailOptions = {
                 from: process.env.EMAIL_USER,
-                to: "tallertobias@outlook.com", // Cambia por tu correo
+                to: "tallertobias@outlook.com", 
                 subject: "Clientes con deuda pendiente",
                 text: cuerpoCorreo
             };
