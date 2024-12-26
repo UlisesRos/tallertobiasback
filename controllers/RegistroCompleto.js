@@ -39,8 +39,8 @@ const deleteClienteCompleto = async (req, res) => {
         } else {
             res.status(404).json({ error: 'Cliente no encontrado' })
         }
-
-
+        
+        console.log(id)
     } catch (error) {
         res.status(500).json({ error: 'No se pudo eliminar al cliente:', error})
     }
