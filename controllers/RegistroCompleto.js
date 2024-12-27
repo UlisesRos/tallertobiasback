@@ -2,19 +2,37 @@ const Cliente = require('../models/Cliente');
 const Moto = require('../models/Moto');
 const Servicio = require('../models/Servicio')
 
-const registroCompleto = async (req,res) => {
+const registroCompleto = async (req, res) => {
     try {
         const registros = await Cliente.findAll({
             include: [
                 {
                     model: Moto,
+                    required: false
                 },
                 {
-                    model: Servicio
+                    model: Servicio,
+                    required: false
                 }
             ]
         });
-        res.json(registros)
+
+        // Filtramos los clientes que no tienen Moto o Servicio
+        const clientesIncompletos = registros.filter(
+            (cliente) => !cliente.Motos.length || !cliente.Servicios.length
+        );
+
+        // Elimina los clientes incompletos de la base de datos
+        for (const cliente of clientesIncompletos) {
+            await Cliente.destroy({ where: {id: cliente.id }})
+        }
+
+        // Devuelve solo los clientes completos 
+        const registrosCompletos = registros.filter(
+            (cliente) => cliente.Motos.length && cliente.Servicios.length
+        )
+
+        res.json(registrosCompletos)
     } catch (error) {
         console.error('Error al obtener los registros', error);
         res.status(500).json({ error: 'Error al obtener los registros' })
