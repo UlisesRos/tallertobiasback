@@ -36,5 +36,61 @@ const deleteTurno = async (req, res) => {
     }
 }
 
+const updateRepuestos = async (req, res) => {
+    try {
+        const { id } = req.params; 
+        const { repuestos } = req.body; 
 
-module.exports = { postTurno, getTurnos, deleteTurno }
+        if (!Array.isArray(repuestos)) {
+            return res.status(400).json({ error: 'Los repuestos deben ser un array de strings.' });
+        }
+
+        // Obtener el turno actual
+        const turno = await Turno.findOne({ where: { id: id }});
+        if (!turno) {
+            return res.status(404).json({ error: 'Turno no encontrado' });
+        }
+
+        // Asegurarse de que listaRepuestos sea un array (si no existe, inicializarlo como un array vacío)
+        turno.listaRepuestos = turno.listaRepuestos || [];
+
+        // Evitar repuestos duplicados
+        const updatedRepuestos = [...new Set([...turno.listaRepuestos, ...repuestos])]; 
+
+        // Actualizar la lista de repuestos
+        turno.listaRepuestos = updatedRepuestos;
+        await turno.save();
+
+        res.status(200).json({ message: 'Lista de repuestos actualizada', listaRepuestos: updatedRepuestos });
+    } catch (error) {
+        console.error('Error al actualizar los repuestos:', error);
+        res.status(500).json({ error: 'Error en el servidor al actualizar los repuestos.' });
+    }
+};
+
+const deleteRepuesto = async (req, res) => {
+    try {
+        const { id, repuesto } = req.params; // Obtener el id del cliente y el repuesto a eliminar
+
+        // Obtener el turno del cliente
+        const turno = await Turno.findOne({ where: { id: id } });
+        if (!turno) {
+            return res.status(404).json({ error: 'Turno no encontrado' });
+        }
+
+        // Filtrar el repuesto a eliminar de la lista
+        const updatedRepuestos = turno.listaRepuestos.filter(item => item !== repuesto);
+
+        // Actualizar la lista de repuestos
+        turno.listaRepuestos = updatedRepuestos;
+        await turno.save();
+
+        res.status(200).json({ message: 'Repuesto eliminado correctamente', listaRepuestos: updatedRepuestos });
+    } catch (error) {
+        console.error('Error al eliminar el repuesto:', error);
+        res.status(500).json({ error: 'Error en el servidor al eliminar el repuesto.' });
+    }
+};
+
+
+module.exports = { postTurno, getTurnos, deleteTurno, updateRepuestos, deleteRepuesto }

@@ -22,7 +22,12 @@ const Turno = sequelize.define('Turno', {
     fecha: {
         type: DataTypes.STRING,
         allowNull: false
-    }
+    },
+    listaRepuestos: {
+        type: DataTypes.JSON,
+        allowNull: true,
+        defaultValue: []
+    },
 }, {
     tableName: 'turnos',
     timestamps: true,

@@ -21,10 +21,5 @@ router.put('/updatemontomanoobra/:id', updateMontoManoObra)
 // Editar Monto Repuesto
 router.put('/updatemontorepuesto/:id', updateMotoRepuesto)
 
-// Editar repuestos
-router.put('/updaterepuestos/:id', updateRepuestos)
-
-// Eliminar repuestos
-router.delete('/deleterepuesto/:id/:repuesto', deleteRepuesto)
 
 module.exports = router;

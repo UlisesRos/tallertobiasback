@@ -48,11 +48,6 @@ const Servicio = sequelize.define('Servicio', {
         type: DataTypes.STRING,
         allowNull: true
     },
-    listaRepuestos: {
-        type: DataTypes.JSON,
-        allowNull: true,
-        defaultValue: []
-    },
     clienteId: {
         type: DataTypes.INTEGER,
         allowNull: false,
