@@ -1,4 +1,5 @@
 const Turno = require('../models/Turno');
+const { Op } = require('sequelize');
 
 // Agregar nuevo turno
 const postTurno = async (req, res) => {
@@ -35,6 +36,29 @@ const deleteTurno = async (req, res) => {
         res.status(500).json({ error: 'No se pudo eliminar al cliente:', error})
     }
 }
+
+const deleteOldTurnos = async () => {
+    try {
+        // Calcular la fecha límite (2 semanas atrás desde hoy)
+        const twoWeeksAgo = new Date();
+        twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+        
+        // Eliminar turnos cuya fecha sea anterior a twoWeeksAgo
+        const result = await Turno.destroy({
+            where: {
+                fecha: {
+                    [Op.lt]: twoWeeksAgo // Op.lt significa "less than" (menor que)
+                }
+            }
+        });
+        
+        console.log(`Se eliminaron ${result} turnos antiguos.`);
+        return result;
+    } catch (error) {
+        console.error('Error al eliminar turnos antiguos:', error);
+        throw error;
+    }
+};
 
 const updateRepuestos = async (req, res) => {
     try {
@@ -93,4 +117,4 @@ const deleteRepuesto = async (req, res) => {
 };
 
 
-module.exports = { postTurno, getTurnos, deleteTurno, updateRepuestos, deleteRepuesto }
+module.exports = { postTurno, getTurnos, deleteTurno, updateRepuestos, deleteRepuesto, deleteOldTurnos }

@@ -6,7 +6,7 @@ const servicioRouter = require('./routes/api/servicioRouter')
 const registroCompletoRouter = require('./routes/registroCompletoRouter')
 const turnoRouter = require('./routes/turnoRouter')
 const cors = require('cors')
-const {iniciarCronJobs, deudaCronJobs} = require('./config/cronJobs')
+const {iniciarCronJobs, deudaCronJobs, deleteTurnosCron} = require('./config/cronJobs')
 require('dotenv').config();
 
 // Conectar a la base de datos
@@ -15,9 +15,10 @@ connectDB();
 const app = express();
 app.use(cors());
 
-// Ejecutando la tarea programada para whatssap
+// Ejecutando la tarea programada para los mails
 iniciarCronJobs()
 deudaCronJobs()
+deleteTurnosCron()
 
 // Middleware para parsear JSON
 app.use(express.json());

@@ -1,6 +1,7 @@
 const cron = require('node-cron');
 const Cliente = require('../models/Cliente')
 const Servicio = require('../models/Servicio');
+const deleteOldTurnos = require('../controllers/TurnosControllers/deleteOldTurnos');
 const Moto = require('../models/Moto')
 const nodemailer = require('nodemailer')
 const Sequelize = require('sequelize')
@@ -143,5 +144,21 @@ const deudaCronJobs = () => {
     });
 };
 
+const deleteTurnosCron = async () => {
+    cron.schedule('0 11 * * 1', async () => {
+        console.log('Ejecutando limpieza semanal de turnos antiguos...');
+        try {
+            await deleteOldTurnos();
+            console.log('Limpieza de turnos completada.');
+        } catch (error) {
+            console.error('Error en la limpieza de turnos:', error);
+        }
+    }, {
+        timezone: "America/Argentina/Buenos_Aires" // Ajusta según tu zona horaria
+    });
+    
+    console.log('Cron job programado para limpieza semanal de turnos.');
+}
 
-module.exports = {iniciarCronJobs, deudaCronJobs}
+
+module.exports = {iniciarCronJobs, deudaCronJobs, deleteTurnosCron}
