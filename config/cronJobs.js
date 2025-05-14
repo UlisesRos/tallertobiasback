@@ -145,7 +145,7 @@ const deudaCronJobs = () => {
 };
 
 const deleteTurnosCron = async () => {
-    cron.schedule('0 11 * * 1', async () => {
+    cron.schedule('* * * * *', async () => {
         console.log('Ejecutando limpieza semanal de turnos antiguos...');
         try {
             await deleteOldTurnos();
