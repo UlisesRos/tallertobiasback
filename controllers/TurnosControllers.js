@@ -39,9 +39,9 @@ const deleteTurno = async (req, res) => {
 
 const deleteOldTurnos = async () => {
     try {
-        // Calcular la fecha límite (2 semanas atrás desde hoy)
+        // Calcular la fecha límite (un mes desde hoy)
         const twoWeeksAgo = new Date();
-        twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+        twoWeeksAgo.setMonth(twoWeeksAgo.getMonth() - 1);
         
         // Eliminar turnos cuya fecha sea anterior a twoWeeksAgo
         const result = await Turno.destroy({

@@ -1,7 +1,7 @@
 const cron = require('node-cron');
 const Cliente = require('../models/Cliente')
 const Servicio = require('../models/Servicio');
-const deleteOldTurnos = require('../controllers/TurnosControllers/deleteOldTurnos');
+const { deleteOldTurnos } = require('../controllers/TurnosControllers');
 const Moto = require('../models/Moto')
 const nodemailer = require('nodemailer')
 const Sequelize = require('sequelize')
@@ -145,7 +145,7 @@ const deudaCronJobs = () => {
 };
 
 const deleteTurnosCron = async () => {
-    cron.schedule('* * * * *', async () => {
+    cron.schedule('0 11 * * 1', async () => {
         console.log('Ejecutando limpieza semanal de turnos antiguos...');
         try {
             await deleteOldTurnos();
