@@ -16,10 +16,6 @@ const Moto = sequelize.define('Moto', {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    patente: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
     km: {
         type: DataTypes.STRING,
         allowNull: true
