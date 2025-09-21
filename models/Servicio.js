@@ -44,6 +44,10 @@ const Servicio = sequelize.define('Servicio', {
         type: DataTypes.STRING,
         allowNull: true
     },
+    kmProximoServicio: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
     descripcionProximoServicio: {   
         type: DataTypes.STRING,
         allowNull: true
