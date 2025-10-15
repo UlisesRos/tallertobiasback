@@ -5,8 +5,9 @@ const motoRouter = require('./routes/api/motoRouter')
 const servicioRouter = require('./routes/api/servicioRouter')
 const registroCompletoRouter = require('./routes/registroCompletoRouter')
 const turnoRouter = require('./routes/turnoRouter')
+const datosServicioRouter = require('./routes/api/datosServicioRouter')
 const cors = require('cors')
-const {iniciarCronJobs, deudaCronJobs, deleteTurnosCron} = require('./config/cronJobs')
+const {iniciarCronJobs, deudaCronJobs, deleteTurnosCron, recordatorioTurnosCron} = require('./config/cronJobs')
 require('dotenv').config();
 
 // Conectar a la base de datos
@@ -19,6 +20,7 @@ app.use(cors());
 iniciarCronJobs()
 deudaCronJobs()
 deleteTurnosCron()
+recordatorioTurnosCron()
 
 // Middleware para parsear JSON
 app.use(express.json());
@@ -32,6 +34,9 @@ app.use('/api', motoRouter)
 
 // Ruta de servicios
 app.use('/api', servicioRouter)
+
+// Ruta de datos de servicio
+app.use('/api', datosServicioRouter)
 
 // Ruta de registro completo
 app.use('/', registroCompletoRouter)

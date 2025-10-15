@@ -11,6 +11,13 @@ const Turno = sequelize.define('Turno', {
         type: DataTypes.STRING,
         allowNull: false, // No puede estar vacio
     },
+    email: {
+        type: DataTypes.STRING,
+        allowNull: true, // Opcional, por si algunos clientes no tienen email
+        validate: {
+            isEmail: true // Valida que sea un email válido
+        }
+    },
     moto: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -28,6 +35,11 @@ const Turno = sequelize.define('Turno', {
         allowNull: true,
         defaultValue: []
     },
+    recordatorioEnviado: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+        defaultValue: false // Para evitar enviar el mismo recordatorio dos veces
+    }
 }, {
     tableName: 'turnos',
     timestamps: true,
