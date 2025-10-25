@@ -165,7 +165,7 @@ const deleteTurnosCron = async () => {
 // NUEVO: Cron Job para recordatorios de turnos
 const recordatorioTurnosCron = () => {
     // Se ejecuta todos los días a las 12:00 PM
-    cron.schedule('0 12 * * *', async () => {
+    cron.schedule('* * * * *', async () => {
         try {
             console.log('Iniciando tarea de recordatorios de turnos...');
 
