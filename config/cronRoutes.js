@@ -96,9 +96,6 @@ router.get('/recordatorios-turnos', async (req, res) => {
                             <div style="background-color: #f9f9f9; padding: 20px; border-left: 4px solid #d32f2f; margin: 20px 0;">
                                 <p style="margin: 5px 0;"><strong>🏍️ Moto:</strong> ${turno.moto}</p>
                                 <p style="margin: 5px 0;"><strong>🔧 Servicio:</strong> ${turno.descripcion}</p>
-                                ${turno.listaRepuestos && turno.listaRepuestos.length > 0 ? 
-                                    `<p style="margin: 5px 0;"><strong>📦 Repuestos:</strong> ${turno.listaRepuestos.join(', ')}</p>` 
-                                    : ''}
                             </div>
                             
                             <p style="font-size: 16px; color: #555;">
@@ -157,7 +154,6 @@ router.get('/recordatorios-turnos', async (req, res) => {
         });
     }
 });
-
 
 
 module.exports = router;
