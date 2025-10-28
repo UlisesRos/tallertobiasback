@@ -8,13 +8,17 @@ const nodemailer = require('nodemailer')
 // Configuracion de nodemailer
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, // Usar SSL
+    port: 587,
+    secure: false,
+    requireTLS: true,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
     },
-    connectionTimeout: 30000, // 30 segundos
+    tls: {
+        rejectUnauthorized: false
+    },
+    connectionTimeout: 30000,
     greetingTimeout: 30000,
     socketTimeout: 30000
 });
