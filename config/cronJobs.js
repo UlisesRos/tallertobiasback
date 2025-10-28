@@ -1,10 +1,12 @@
 const cron = require('node-cron');
-const Cliente = require('../models/Cliente')
+const Cliente = require('../models/Cliente');
 const Servicio = require('../models/Servicio');
 const { deleteOldTurnos } = require('../controllers/TurnosControllers');
 const Moto = require('../models/Moto');
-const nodemailer = require('nodemailer')
-const Sequelize = require('sequelize')
+const Turno = require('../models/Turno');
+const nodemailer = require('nodemailer');
+const Sequelize = require('sequelize');
+const { Op } = require('sequelize');
 require('dotenv').config()
 
 // Configuracion de nodemailer
@@ -173,11 +175,7 @@ const recordatorioTurnosCron = () => {
             mañana.setDate(mañana.getDate() + 1);
             const mañanaStr = mañana.toISOString().split('T')[0]; // Formato YYYY-MM-DD
 
-            console.log('Buscando turnos para:', mañanaStr);
-
-            // Buscar turnos para mañana que tengan email y no se les haya enviado recordatorio
-            const Turno = require('../models/Turno');
-            const { Op } = require('sequelize');
+            console.log('Buscando turnos para:', mañanaStr);    
             
             const turnosMañana = await Turno.findAll({
                 where: {
