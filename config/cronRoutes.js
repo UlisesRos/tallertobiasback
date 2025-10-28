@@ -7,11 +7,16 @@ const nodemailer = require('nodemailer')
 
 // Configuracion de nodemailer
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // Usar SSL
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
-    }
+    },
+    connectionTimeout: 30000, // 30 segundos
+    greetingTimeout: 30000,
+    socketTimeout: 30000
 });
 
 // Ruta para enviar recordatorios de turnos
