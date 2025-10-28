@@ -3,24 +3,16 @@ const express = require('express');
 const router = express.Router();
 const { Op } = require('sequelize');
 const Turno = require('../models/Turno');
-const nodemailer = require('nodemailer')
+const nodemailer = require('nodemailer');
+require('dotenv').config()
 
 // Configuracion de nodemailer
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    requireTLS: true,
+    service: 'gmail',
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
-    },
-    tls: {
-        rejectUnauthorized: false
-    },
-    connectionTimeout: 30000,
-    greetingTimeout: 30000,
-    socketTimeout: 30000
+    }
 });
 
 // Ruta para enviar recordatorios de turnos
@@ -62,8 +54,8 @@ router.get('/recordatorios-turnos', async (req, res) => {
         let enviadosExitosos = 0;
         let errores = [];
 
-        // Enviar email a cada cliente
-        for (const turno of turnosMañana) {
+        // Crear promesas para todos los envíos
+        const enviosPromises = turnosMañana.map(async (turno) => {
             const fechaTurno = new Date(turno.fecha);
             const fechaFormateada = fechaTurno.toLocaleDateString('es-AR', {
                 weekday: 'long',
@@ -117,23 +109,52 @@ router.get('/recordatorios-turnos', async (req, res) => {
                 `
             };
 
-            try {
-                await transporter.sendMail(mailOptions);
-                console.log(`✅ Recordatorio enviado a ${turno.email} para turno del ${fechaFormateada}`);
-                
-                // Marcar como enviado
-                turno.recordatorioEnviado = true;
-                await turno.save();
-                
+            return new Promise((resolve) => {
+                transporter.sendMail(mailOptions, async (error, info) => {
+                    if (error) {
+                        console.error(`❌ Error al enviar recordatorio a ${turno.email}:`, error);
+                        resolve({
+                            success: false,
+                            email: turno.email,
+                            error: error.message
+                        });
+                    } else {
+                        console.log(`✅ Recordatorio enviado a ${turno.email} para turno del ${fechaFormateada}`);
+                        
+                        try {
+                            turno.recordatorioEnviado = true;
+                            await turno.save();
+                            resolve({
+                                success: true,
+                                email: turno.email
+                            });
+                        } catch (saveError) {
+                            console.error('Error al guardar estado del turno:', saveError);
+                            resolve({
+                                success: true, // Email se envió, pero no se guardó el estado
+                                email: turno.email,
+                                warning: 'Email enviado pero no se pudo marcar como enviado'
+                            });
+                        }
+                    }
+                });
+            });
+        });
+
+        // Esperar a que todos los envíos terminen
+        const resultados = await Promise.all(enviosPromises);
+        
+        // Procesar resultados
+        resultados.forEach(resultado => {
+            if (resultado.success) {
                 enviadosExitosos++;
-            } catch (error) {
-                console.error(`❌ Error al enviar recordatorio a ${turno.email}:`, error);
+            } else {
                 errores.push({
-                    email: turno.email,
-                    error: error.message
+                    email: resultado.email,
+                    error: resultado.error
                 });
             }
-        }
+        });
 
         console.log('✅ Tarea de recordatorios completada');
 
@@ -154,5 +175,6 @@ router.get('/recordatorios-turnos', async (req, res) => {
         });
     }
 });
+
 
 module.exports = router;
