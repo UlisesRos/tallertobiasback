@@ -18,6 +18,7 @@
     "mysql2": "^3.11.3",
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.16",
+    "resend": "^6.3.0",
     "sequelize": "^6.37.4",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",

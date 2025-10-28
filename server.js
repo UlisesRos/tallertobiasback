@@ -6,6 +6,7 @@ const servicioRouter = require('./routes/api/servicioRouter')
 const registroCompletoRouter = require('./routes/registroCompletoRouter')
 const turnoRouter = require('./routes/turnoRouter')
 const datosServicioRouter = require('./routes/api/datosServicioRouter')
+const cronRoutes = require('./config/cronRoutes')
 const cors = require('cors')
 const {iniciarCronJobs, deudaCronJobs, deleteTurnosCron, recordatorioTurnosCron } = require('./config/cronJobs')
 require('dotenv').config();
@@ -26,6 +27,9 @@ recordatorioTurnosCron()
 app.use(express.json());
 
 // RUTAS
+// Ruta de recordatorios de turnos
+app.use('/api', cronRoutes)
+
 // Ruta de clientes
 app.use('/api', clienteRouter)
 
