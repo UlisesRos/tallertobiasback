@@ -2,7 +2,7 @@ const cron = require('node-cron');
 const Cliente = require('../models/Cliente')
 const Servicio = require('../models/Servicio');
 const { deleteOldTurnos } = require('../controllers/TurnosControllers');
-const Moto = require('../models/Moto')
+const Moto = require('../models/Moto');
 const nodemailer = require('nodemailer')
 const Sequelize = require('sequelize')
 require('dotenv').config()
@@ -158,9 +158,126 @@ const deleteTurnosCron = async () => {
     });
     
     console.log('Cron job programado para limpieza semanal de turnos.');
-}
+};
 
+// Agregar al final de config/cronJobs.js, antes del module.exports
 
+const recordatorioTurnosCron = () => {
+    // Se ejecuta todos los días a las 12:00 PM
+    cron.schedule('*/1 * * * *', async () => {
+        try {
+            console.log('Iniciando tarea de recordatorios de turnos...');
 
+            // Calcular la fecha de mañana
+            const mañana = new Date();
+            mañana.setDate(mañana.getDate() + 1);
+            const mañanaStr = mañana.toISOString().split('T')[0]; // Formato YYYY-MM-DD
 
-module.exports = { iniciarCronJobs, deudaCronJobs, deleteTurnosCron }
+            console.log('Buscando turnos para:', mañanaStr);
+
+            // Buscar turnos para mañana que tengan email y no se les haya enviado recordatorio
+            const Turno = require('../models/Turno');
+            const { Op } = require('sequelize');
+            
+            const turnosMañana = await Turno.findAll({
+                where: {
+                    fecha: {
+                        [Op.like]: `${mañanaStr}%`
+                    },
+                    email: {
+                        [Op.ne]: null,
+                        [Op.ne]: ''
+                    },
+                    recordatorioEnviado: false
+                }
+            });
+
+            console.log(`Se encontraron ${turnosMañana.length} turnos para enviar recordatorio`);
+
+            if (turnosMañana.length === 0) {
+                console.log('No hay turnos con email para mañana');
+                return;
+            }
+
+            // Enviar email a cada cliente - IGUAL QUE LOS OTROS CRON JOBS
+            turnosMañana.forEach((turno) => {
+                const fechaTurno = new Date(turno.fecha);
+                const fechaFormateada = fechaTurno.toLocaleDateString('es-AR', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                const mailOptions = {
+                    from: process.env.EMAIL_USER,
+                    to: turno.email,
+                    subject: '🔧 Recordatorio de Turno - Taller Tobías',
+                    html: `
+                        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
+                            <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <h2 style="color: #333; text-align: center;">🏍️ Taller Tobías</h2>
+                                <hr style="border: 1px solid #e0e0e0;">
+                                
+                                <h3 style="color: #d32f2f;">Recordatorio de Turno</h3>
+                                
+                                <p style="font-size: 16px; color: #555;">Hola <strong>${turno.nombre}</strong>,</p>
+                                
+                                <p style="font-size: 16px; color: #555;">
+                                    Te recordamos que <strong>mañana ${fechaFormateada}</strong> tienes turno en nuestro taller para realizar el siguiente servicio:
+                                </p>
+                                
+                                <div style="background-color: #f9f9f9; padding: 20px; border-left: 4px solid #d32f2f; margin: 20px 0;">
+                                    <p style="margin: 5px 0;"><strong>🏍️ Moto:</strong> ${turno.moto}</p>
+                                    <p style="margin: 5px 0;"><strong>🔧 Servicio:</strong> ${turno.descripcion}</p>
+                                    ${turno.listaRepuestos && turno.listaRepuestos.length > 0 ? 
+                                        `<p style="margin: 5px 0;"><strong>📦 Repuestos:</strong> ${turno.listaRepuestos.join(', ')}</p>` 
+                                        : ''}
+                                </div>
+                                
+                                <p style="font-size: 16px; color: #555;">
+                                    <strong>⚠️ Importante:</strong> Si no puedes asistir, por favor avísanos con anticipación para reprogramar tu turno.
+                                </p>
+                                
+                                <p style="font-size: 16px; color: #555;">
+                                    ¡Te esperamos!
+                                </p>
+                                
+                                <hr style="border: 1px solid #e0e0e0; margin-top: 30px;">
+                                
+                                <p style="font-size: 14px; color: #999; text-align: center;">
+                                    Taller Tobías - Servicio de Mecánica de Motos<br>
+                                    📧 tallertobias@outlook.com
+                                </p>
+                            </div>
+                        </div>
+                    `
+                };
+
+                // Enviar el correo - EXACTAMENTE COMO LOS OTROS
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.error(`Error al enviar recordatorio a ${turno.email}:`, error);
+                    } else {
+                        console.log(`Recordatorio enviado a ${turno.email}`);
+                        
+                        // Marcar como enviado
+                        turno.recordatorioEnviado = true;
+                        turno.save();
+                    }
+                });
+            });
+
+            console.log('Tarea de recordatorios completada');
+
+        } catch (error) {
+            console.error('Error en la tarea de recordatorios:', error);
+        }
+    }, {
+        timezone: "America/Argentina/Buenos_Aires"
+    });
+
+    console.log('✅ Cron job de recordatorios de turnos programado (12:00 PM diario)');
+};
+
+module.exports = { iniciarCronJobs, deudaCronJobs, deleteTurnosCron, recordatorioTurnosCron }
