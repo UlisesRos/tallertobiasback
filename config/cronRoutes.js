@@ -51,11 +51,16 @@ router.get('/recordatorios-turnos', async (req, res) => {
             });
         }
 
-        let enviadosExitosos = 0;
-        let errores = [];
+        // RESPONDER INMEDIATAMENTE antes de enviar los emails
+        res.json({
+            success: true,
+            message: 'Proceso de envío de recordatorios iniciado',
+            turnosEncontrados: turnosMañana.length,
+            estado: 'Los emails se están enviando en segundo plano'
+        });
 
-        // Crear promesas para todos los envíos
-        const enviosPromises = turnosMañana.map(async (turno) => {
+        // Enviar emails en background (después de responder)
+        turnosMañana.forEach((turno) => {
             const fechaTurno = new Date(turno.fecha);
             const fechaFormateada = fechaTurno.toLocaleDateString('es-AR', {
                 weekday: 'long',
@@ -109,62 +114,25 @@ router.get('/recordatorios-turnos', async (req, res) => {
                 `
             };
 
-            return new Promise((resolve) => {
-                transporter.sendMail(mailOptions, async (error, info) => {
-                    if (error) {
-                        console.error(`❌ Error al enviar recordatorio a ${turno.email}:`, error);
-                        resolve({
-                            success: false,
-                            email: turno.email,
-                            error: error.message
-                        });
-                    } else {
-                        console.log(`✅ Recordatorio enviado a ${turno.email} para turno del ${fechaFormateada}`);
-                        
-                        try {
-                            turno.recordatorioEnviado = true;
-                            await turno.save();
-                            resolve({
-                                success: true,
-                                email: turno.email
-                            });
-                        } catch (saveError) {
-                            console.error('Error al guardar estado del turno:', saveError);
-                            resolve({
-                                success: true, // Email se envió, pero no se guardó el estado
-                                email: turno.email,
-                                warning: 'Email enviado pero no se pudo marcar como enviado'
-                            });
-                        }
+            // Enviar email con callback (igual que en cronJobs.js que funciona)
+            transporter.sendMail(mailOptions, async (error, info) => {
+                if (error) {
+                    console.error(`❌ Error al enviar recordatorio a ${turno.email}:`, error);
+                } else {
+                    console.log(`✅ Recordatorio enviado a ${turno.email} para turno del ${fechaFormateada}`);
+                    
+                    // Marcar como enviado
+                    try {
+                        turno.recordatorioEnviado = true;
+                        await turno.save();
+                    } catch (saveError) {
+                        console.error('Error al guardar estado del turno:', saveError);
                     }
-                });
+                }
             });
         });
 
-        // Esperar a que todos los envíos terminen
-        const resultados = await Promise.all(enviosPromises);
-        
-        // Procesar resultados
-        resultados.forEach(resultado => {
-            if (resultado.success) {
-                enviadosExitosos++;
-            } else {
-                errores.push({
-                    email: resultado.email,
-                    error: resultado.error
-                });
-            }
-        });
-
-        console.log('✅ Tarea de recordatorios completada');
-
-        return res.json({
-            success: true,
-            message: 'Tarea de recordatorios completada',
-            turnosEncontrados: turnosMañana.length,
-            enviadosExitosos,
-            errores: errores.length > 0 ? errores : undefined
-        });
+        console.log('✅ Respuesta enviada, emails en proceso de envío...');
 
     } catch (error) {
         console.error('❌ Error en la tarea de recordatorios:', error);
