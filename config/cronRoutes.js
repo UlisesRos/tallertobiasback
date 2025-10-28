@@ -4,6 +4,7 @@ const router = express.Router();
 const { Op } = require('sequelize');
 const Turno = require('../models/Turno');
 const nodemailer = require('nodemailer');
+const util = require('util');
 require('dotenv').config()
 
 // Configuracion de nodemailer
@@ -15,29 +16,30 @@ const transporter = nodemailer.createTransport({
     }
 });
 
+// Convertir sendMail a Promise para poder usar async/await correctamente
+const sendMailPromise = util.promisify(transporter.sendMail.bind(transporter));
+
 // Ruta para enviar recordatorios de turnos
 router.get('/recordatorios-turnos', async (req, res) => {
     try {
         console.log('🕐 Iniciando tarea de recordatorios de turnos...');
 
-        // Calcular la fecha de mañana
         const mañana = new Date();
         mañana.setDate(mañana.getDate() + 1);
-        const mañanaStr = mañana.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+        const mañanaStr = mañana.toISOString().split('T')[0];
 
         console.log('📅 Buscando turnos para:', mañanaStr);
 
-        // Buscar turnos para mañana que tengan email y no se les haya enviado recordatorio
         const turnosMañana = await Turno.findAll({
             where: {
                 fecha: {
-                    [Op.like]: `${mañanaStr}%` // Busca turnos que coincidan con la fecha
+                    [Op.like]: `${mañanaStr}%`
                 },
                 email: {
-                    [Op.ne]: null, // Email no es null
-                    [Op.ne]: '' // Email no está vacío
+                    [Op.ne]: null,
+                    [Op.ne]: ''
                 },
-                recordatorioEnviado: false // Aún no se envió el recordatorio
+                recordatorioEnviado: false
             }
         });
 
@@ -51,31 +53,20 @@ router.get('/recordatorios-turnos', async (req, res) => {
             });
         }
 
-        // RESPONDER INMEDIATAMENTE antes de enviar los emails
-        res.json({
-            success: true,
-            message: 'Proceso de envío de recordatorios iniciado',
-            turnosEncontrados: turnosMañana.length,
-            estado: 'Los emails se están enviando en segundo plano'
-        });
+        let enviadosExitosos = 0;
+        let errores = [];
 
-        // Enviar emails en background (después de responder)
-        // Usar setImmediate para asegurar que se ejecute después de responder
-        setImmediate(() => {
-            console.log('📧 Iniciando envío de emails en background...');
-            
-            turnosMañana.forEach((turno) => {
-                console.log(`📤 Preparando email para ${turno.email}...`);
-                
-                const fechaTurno = new Date(turno.fecha);
-                const fechaFormateada = fechaTurno.toLocaleDateString('es-AR', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
+        // Enviar emails UNO POR UNO esperando cada uno (no en paralelo)
+        for (const turno of turnosMañana) {
+            const fechaTurno = new Date(turno.fecha);
+            const fechaFormateada = fechaTurno.toLocaleDateString('es-AR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
 
-                const mailOptions = {
+            const mailOptions = {
                 from: process.env.EMAIL_USER,
                 to: turno.email,
                 subject: '🔧 Recordatorio de Turno - Taller Tobías',
@@ -96,6 +87,9 @@ router.get('/recordatorios-turnos', async (req, res) => {
                             <div style="background-color: #f9f9f9; padding: 20px; border-left: 4px solid #d32f2f; margin: 20px 0;">
                                 <p style="margin: 5px 0;"><strong>🏍️ Moto:</strong> ${turno.moto}</p>
                                 <p style="margin: 5px 0;"><strong>🔧 Servicio:</strong> ${turno.descripcion}</p>
+                                ${turno.listaRepuestos && turno.listaRepuestos.length > 0 ? 
+                                    `<p style="margin: 5px 0;"><strong>📦 Repuestos:</strong> ${turno.listaRepuestos.join(', ')}</p>` 
+                                    : ''}
                             </div>
                             
                             <p style="font-size: 16px; color: #555;">
@@ -117,33 +111,39 @@ router.get('/recordatorios-turnos', async (req, res) => {
                 `
             };
 
-            console.log(`🚀 Enviando email a ${turno.email}...`);
+            try {
+                console.log(`🚀 Enviando email a ${turno.email}...`);
+                
+                // ESPERAR a que el email se envíe antes de continuar
+                await sendMailPromise(mailOptions);
+                
+                console.log(`✅ Recordatorio enviado a ${turno.email}`);
+                
+                // Marcar como enviado
+                turno.recordatorioEnviado = true;
+                await turno.save();
+                
+                enviadosExitosos++;
+                
+            } catch (error) {
+                console.error(`❌ Error al enviar a ${turno.email}:`, error.message);
+                errores.push({
+                    email: turno.email,
+                    error: error.message
+                });
+            }
+        }
 
-            // Enviar email con callback (igual que en cronJobs.js que funciona)
-            transporter.sendMail(mailOptions, async (error, info) => {
-                if (error) {
-                    console.error(`❌ Error al enviar recordatorio a ${turno.email}:`, error.message);
-                    console.error('Detalles del error:', error);
-                } else {
-                    console.log(`✅ Recordatorio enviado a ${turno.email} para turno del ${fechaFormateada}`);
-                    console.log('Info del envío:', info.response);
-                    
-                    // Marcar como enviado
-                    try {
-                        turno.recordatorioEnviado = true;
-                        await turno.save();
-                        console.log(`💾 Estado actualizado para ${turno.email}`);
-                    } catch (saveError) {
-                        console.error('Error al guardar estado del turno:', saveError);
-                    }
-                }
-            });
+        console.log('✅ Tarea de recordatorios completada');
+
+        // Responder DESPUÉS de enviar todos los emails
+        return res.json({
+            success: true,
+            message: 'Tarea de recordatorios completada',
+            turnosEncontrados: turnosMañana.length,
+            enviadosExitosos,
+            errores: errores.length > 0 ? errores : undefined
         });
-        
-        console.log('✅ Todos los procesos de envío iniciados');
-    });
-
-        console.log('✅ Respuesta enviada, emails en proceso de envío...');
 
     } catch (error) {
         console.error('❌ Error en la tarea de recordatorios:', error);
@@ -154,6 +154,5 @@ router.get('/recordatorios-turnos', async (req, res) => {
         });
     }
 });
-
 
 module.exports = router;
