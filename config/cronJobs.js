@@ -10,16 +10,17 @@ require('dotenv').config()
 
 // Configuracion de nodemailer
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: "smtp-relay.brevo.com",
+    port: 587,
+    secure: false,
     auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
+        user: process.env.BREVO_USER,   // tu email verificado en Brevo
+        pass: process.env.BREVO_PASS,   // tu key SMTP
+    },
 });
-
 const iniciarCronJobs = () => {
 
-    cron.schedule('0 10 * * *', async () => {
+    cron.schedule('0 7 * * *', async () => {
         try {
             console.log('Iniciando tarea de actualizacion de proximoServicio');
             const registros = await Cliente.findAll({
@@ -67,7 +68,7 @@ const iniciarCronJobs = () => {
 
                     // HTML seguro con optional chaining
                     const mailOptions = {
-                        from: process.env.EMAIL_USER,
+                        from: `"Taller Tobías" <${process.env.EMAIL_USER}>`,
                         to: "tallertobias@outlook.com",
                         subject: `🔧 RECORDATORIO DE SERVICIO PARA ${registro.nombre}`,
                         html: `

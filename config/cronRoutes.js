@@ -6,13 +6,14 @@ const Turno = require('../models/Turno');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-// Transporter de Outlook (el mismo que usás en el cron principal)
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: "smtp-relay.brevo.com",
+    port: 587,
+    secure: false,
     auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
+        user: process.env.BREVO_USER,   // tu email verificado en Brevo
+        pass: process.env.BREVO_PASS,   // tu key SMTP
+    },
 });
 
 // Ruta para enviar recordatorios de turnos
