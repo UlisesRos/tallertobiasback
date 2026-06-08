@@ -103,10 +103,33 @@ const migrarColumnasServicio = async () => {
     }
 };
 
+const migrarColumnasTurnos = async () => {
+    try {
+        const qi = sequelize.getQueryInterface();
+        const tabla = await qi.describeTable('turnos').catch(() => null);
+        if (!tabla) return;
+
+        const { DataTypes } = require('sequelize');
+
+        if (!tabla['horario']) {
+            await qi.addColumn('turnos', 'horario', {
+                type: DataTypes.STRING,
+                allowNull: true,
+                defaultValue: ''
+            });
+            console.log('Columna horario agregada a turnos');
+        }
+        console.log('Migración de turnos completada');
+    } catch (err) {
+        console.error('Error en migración de columnas turnos:', err.message);
+    }
+};
+
 // Sincronizar los modelos con la base de datos y luego iniciar el servidor.
 sequelize.sync()
   .then(async () => {
     await migrarColumnasServicio();
+    await migrarColumnasTurnos();
     console.log('Base de datos Sincronizada');
     app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));
   })

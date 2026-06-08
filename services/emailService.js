@@ -122,33 +122,34 @@ class EmailService {
             <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                 <h2 style="color: #333; text-align: center;">🏍️ Taller Tobías</h2>
                 <hr style="border: 1px solid #e0e0e0;">
-                
+
                 <h3 style="color: #d32f2f;">Recordatorio de Turno</h3>
-                
+
                 <p style="font-size: 16px; color: #555;">Hola <strong>${turno.nombre}</strong>,</p>
-                
+
                 <p style="font-size: 16px; color: #555;">
                     Te recordamos que <strong>mañana ${fechaFormateada}</strong> tienes un turno en nuestro taller para realizar el siguiente servicio:
                 </p>
-                
+
                 <div style="background-color: #f9f9f9; padding: 20px; border-left: 4px solid #d32f2f; margin: 20px 0;">
                     <p style="margin: 5px 0;"><strong>🏍️ Moto:</strong> ${turno.moto}</p>
                     <p style="margin: 5px 0;"><strong>🔧 Servicio:</strong> ${turno.descripcion}</p>
+                    ${turno.horario ? `<p style="margin: 5px 0;"><strong>🕐 Horario:</strong> ${turno.horario} hs</p>` : ''}
                     ${
                         turno.listaRepuestos && turno.listaRepuestos.length > 0
                         ? `<p style="margin: 5px 0;"><strong>📦 Repuestos:</strong> ${turno.listaRepuestos.join(', ')}</p>`
                         : ''
                     }
                 </div>
-                
+
                 <p style="font-size: 16px; color: #555;">
                     <strong>⚠️ Importante:</strong> Si no puedes asistir, por favor avísanos con anticipación para reprogramar tu turno.
                 </p>
-                
+
                 <p style="font-size: 16px; color: #555;">¡Te esperamos!</p>
-                
+
                 <hr style="border: 1px solid #e0e0e0; margin-top: 30px;">
-                
+
                 <p style="font-size: 14px; color: #999; text-align: center;">
                     Taller Tobías - Servicio de Mecánica de Motos<br>
                     📧 tallertobias@outlook.com
@@ -196,6 +197,159 @@ class EmailService {
      * @private
      */
     generateServiceReminderHTML(registro, servicio, datosServicio) {
+        const d = datosServicio || {};
+
+        const row = (label, value) =>
+            value && value.toString().trim()
+                ? `<div class="data-item"><span class="label">${label}:</span> ${value}</div>`
+                : '';
+
+        const section = (icon, title, rows) => {
+            const content = rows.filter(Boolean).join('');
+            return content
+                ? `<div class="info-box"><h4>${icon} ${title}</h4>${content}</div>`
+                : '';
+        };
+
+        const fichaHTML = d.id ? `
+            <h3 class="section-title">📊 FICHA TÉCNICA DEL ÚLTIMO SERVICIO</h3>
+
+            ${section('🛢️', 'Lubricado', [
+                row('Cambio aceite', d.cambioAceite),
+                row('Tipo aceite', d.tipoAceite),
+                row('Cambio filtro aceite', d.cambioFiltroAceite),
+                row('Marca filtro aceite', d.marcaFiltroAceite),
+            ])}
+
+            ${section('⛽', 'Carburación', [
+                row('Cambio mangueras', d.cambioMangueras),
+                row('Cambio filtro nafta', d.cambioFiltroNafta),
+                row('Cambio bomba nafta', d.cambioBombaNafta),
+                row('Cambio filtro aire', d.cambioFiltroAire),
+                row('Limpieza y mantenimiento', d.limpiezaMantenimiento),
+                row('Cambio reparación', d.cambioReparacion),
+                row('Cambio carburador', d.cambioCarburador),
+            ])}
+
+            ${section('🔩', 'Cabezal', [
+                row('Revisión asiento válvulas', d.revisionAsientoValvulas),
+                row('Reparación/recambio válvulas', d.reparacionRecambioValvulas),
+                row('Registro válvulas', d.registroValvulas),
+                row('Luz válvulas', d.luzValvulas),
+                row('Cambio bujía', d.cambioBujia),
+                row('Tipo bujía', d.tipoBujia),
+                row('Junta escape', d.juntaEscape),
+                row('Revisión compresión', d.revisionCompresion),
+                row('PSI compresión', d.psiCompresion),
+                row('Rectificación cilindro', d.rectificacionCilindro),
+                row('Medida cilindro', d.medidaCilindro),
+                row('Marca cilindro', d.marcaCilindro),
+            ])}
+
+            ${section('⚙️', 'Sistema de Clutch', [
+                row('Cambio discos', d.cambioDisco),
+                row('Marca discos', d.marcaDiscos),
+                row('Recambio canasta', d.recambioCanasta),
+                row('Revisión centrífugo', d.revisionCentrifugo),
+                row('Recambio centrífugo simple', d.recambioCentrifugoSimple),
+                row('Recambio embrague con centrífugo', d.recambioEmbragueCentrifugo),
+                row('Cambio junta tapa embrague', d.cambioJuntaTapaEmbrague),
+                row('Revisión bomba aceite', d.revisionBombaAceite),
+                row('Recambio bomba aceite', d.recambioBombaAceite),
+            ])}
+
+            ${section('⚡', 'Sistema Eléctrico', [
+                row('Prueba batería', d.pruebaBateria),
+                row('Medición batería', d.medicionBateria),
+                row('Prueba sistema carga', d.pruebaSistemaCarga),
+                row('Cambio regulador', d.cambioRegulador),
+                row('Cambio batería', d.cambioBateria),
+                row('Cambio estátor', d.cambioEstator),
+            ])}
+
+            ${section('💡', 'Luces y Botones', [
+                row('Encendido eléctrico', d.encendidoElectrico),
+                row('Cambio botón', d.cambioBoton),
+                row('Cambio relay solenoide', d.cambioRelaySolenoide),
+                row('Cambio bendix', d.cambioBendix),
+                row('Reparación bendix', d.reparacionBendix),
+                row('Reparación arrastre burro', d.reparacionArrastreBurro),
+                row('Reparación problema eléctrico', d.reparacionProblemaElectrico),
+                row('Cuál problema eléctrico', d.cualProblemaElectrico),
+                row('Prueba de luces', d.pruebaDeLuces),
+                row('Recambio focos', d.recambioFocos),
+                row('Prueba botones', d.pruebaBotones),
+                row('Recambio botones', d.recambioBotones),
+                row('Prueba bocina', d.pruebaBocina),
+            ])}
+
+            ${section('🛑', 'Sistema de Frenos', [
+                row('Freno delantero', d.frenoDelantero),
+                row('Recambio pastillas delanteras', d.recambioPastillasDelantera),
+                row('Recambio zapatas delanteras', d.recambioZapatasDelantera),
+                row('Líquido freno delantero', d.liquidoFrenoDelantero),
+                row('Bomba freno delantera', d.bombaFrenoDelantera),
+                row('Cáliper freno delantero', d.calisperFrenoDelantero),
+                row('Cable freno delantero', d.cableFrenoDelantero),
+                row('Otros freno delantero', d.otrosFrenoDelantero),
+                row('Freno trasero', d.frenoTrasero),
+                row('Recambio pastillas traseras', d.recambioPastillasTrasera),
+                row('Recambio zapatas traseras', d.recambioZapatasTrasera),
+                row('Líquido freno trasero', d.liquidoFrenoTrasero),
+                row('Bomba freno trasera', d.bombaFrenoTrasera),
+                row('Cáliper freno trasero', d.calisperFrenoTrasero),
+                row('Varrilla freno trasero', d.varrillaFrenoTrasero),
+                row('Otros freno trasero', d.otrosFrenoTrasero),
+            ])}
+
+            ${section('🔗', 'Sistema de Arrastre', [
+                row('Recambio transmisión completa', d.recambioTransmisionCompleta),
+                row('Tipo transmisión', d.tipoTransmision),
+                row('Registro lavado y lubricado', d.registroLavadoLubricado),
+                row('Cambio tacos/bujes de masa', d.cambioTacosBujesMasa),
+                row('Cambio eje trasero', d.cambioEjeTrasero),
+                row('Cambio porta corona', d.cambioPortaCorona),
+                row('Cambio tornillos y seguros', d.cambioTornillosSeguros),
+                row('Cambio rulemanes', d.cambioRulemanes),
+                row('Cuáles rulemanes', d.cualesRulemanes),
+            ])}
+
+            ${section('🔧', 'Retenes y O-ring', [
+                row('Cambio retenes', d.cambioRetenes),
+                row('Cuáles retenes', d.cualesRetenes),
+                row('Cambio o-ring', d.cambioOring),
+                row('Cuáles o-ring', d.cualesOring),
+            ])}
+
+            ${section('🌀', 'Sistema de Amortiguación', [
+                row('Mantenimiento barras y vástagos', d.mantenimientoBarrasVastagos),
+                row('Cambio líquido hidráulico', d.cambioLiquidoHidraulico),
+                row('Cambio resortes', d.cambioResortes),
+                row('Cambio retenes suspensión', d.cambioRetenesSuspension),
+                row('Medidas retenes suspensión', d.medidasRetenesSuspension),
+                row('Cambio bolilleros direccionales', d.cambioBolillerosDireccionales),
+                row('Mantenimiento trasero amortiguación', d.mantenimientoTraserAmortiguacion),
+                row('Cambio bujes horquillón', d.cambioBujesHorquillon),
+                row('Medida bujes horquillón', d.medidaBujesHorquillon),
+                row('Cambio eje horquillón', d.cambioEjeHorquillon),
+                row('Cambio bujes monoshock', d.cambioBujesMonoshock),
+                row('Cambio monoshock', d.cambioMonoshock),
+                row('Cambio amortiguadores', d.cambioAmortiguadores),
+            ])}
+
+            ${section('📊', 'Tablero', [
+                row('Problema eléctrico tablero', d.problemaElectricoTablero),
+                row('Cuál problema tablero', d.cualProblemaTablero),
+                row('Velocímetro', d.velocimetro),
+                row('Cambio retorno', d.cambioRetorno),
+                row('Cambio cable tablero', d.cambioCableTablero),
+            ])}
+
+            ${d.otrosTrabajos && d.otrosTrabajos.trim()
+                ? `<div class="info-box"><h4>📝 Otros trabajos</h4><div class="data-item">${d.otrosTrabajos}</div></div>`
+                : ''}
+        ` : '<p style="color: #666; font-style: italic;">No hay ficha técnica registrada.</p>';
+
         return `
         <!DOCTYPE html>
         <html>
@@ -217,7 +371,7 @@ class EmailService {
                 <h1>🏍️ Taller Tobías</h1>
                 <h2>Recordatorio de Servicio</h2>
             </div>
-            
+
             <div class="content">
 
                 <div class="info-box">
@@ -242,108 +396,7 @@ class EmailService {
                     ${servicio.kmProximoServicio ? `<div class="data-item"><span class="label">KM próximo servicio:</span> ${servicio.kmProximoServicio}</div>` : ''}
                 </div>
 
-                ${
-                    datosServicio.id ? `
-                    <h3 class="section-title">📊 FICHA TÉCNICA DEL ÚLTIMO SERVICIO</h3>
-
-                    <!-- LUBRICADO -->
-                    ${
-                        datosServicio?.cambioAceiteMotor ||
-                        datosServicio?.tipoAceite ||
-                        datosServicio?.cambioFiltroAceite ||
-                        datosServicio?.cambioFiltroAire ||
-                        datosServicio?.cambioFiltroCombustible ||
-                        datosServicio?.cambioMangueras
-                        ? `
-                        <div class="info-box">
-                            <h4>🛢️ Lubricado y Combustible</h4>
-                            ${datosServicio?.cambioAceiteMotor ? `<div class="data-item"><span class="label">Cambio Aceite Motor:</span> ${datosServicio.cambioAceiteMotor}</div>` : ''}
-                            ${datosServicio?.tipoAceite ? `<div class="data-item"><span class="label">Tipo de Aceite:</span> ${datosServicio.tipoAceite}</div>` : ''}
-                            ${datosServicio?.cambioFiltroAceite ? `<div class="data-item"><span class="label">Filtro de Aceite:</span> ${datosServicio.cambioFiltroAceite}</div>` : ''}
-                            ${datosServicio?.cambioFiltroAire ? `<div class="data-item"><span class="label">Filtro de Aire:</span> ${datosServicio.cambioFiltroAire}</div>` : ''}
-                            ${datosServicio?.cambioFiltroCombustible ? `<div class="data-item"><span class="label">Filtro Combustible:</span> ${datosServicio.cambioFiltroCombustible}</div>` : ''}
-                            ${datosServicio?.cambioMangueras ? `<div class="data-item"><span class="label">Mangueras:</span> ${datosServicio.cambioMangueras}</div>` : ''}
-                        </div>`
-                        : ''
-                    }
-
-                    <!-- ELECTRICO -->
-                    ${
-                        datosServicio?.diagnosticoBateria ||
-                        datosServicio?.voltajeBateria ||
-                        datosServicio?.revisionRegulador ||
-                        datosServicio?.revisionSistemaLuces ||
-                        datosServicio?.focosEnMalEstado ||
-                        datosServicio?.fichasRecambio ||
-                        datosServicio?.terminalesRecambio ||
-                        datosServicio?.revisionFugas ||
-                        datosServicio?.reparacionCablesDanados
-                        ? `
-                        <div class="info-box">
-                            <h4>⚡ Sistema Eléctrico</h4>
-                            ${datosServicio?.diagnosticoBateria ? `<div class="data-item"><span class="label">Diagnóstico Batería:</span> ${datosServicio.diagnosticoBateria}</div>` : ''}
-                            ${datosServicio?.voltajeBateria ? `<div class="data-item"><span class="label">Voltaje:</span> ${datosServicio.voltajeBateria}</div>` : ''}
-                            ${datosServicio?.revisionRegulador ? `<div class="data-item"><span class="label">Regulador:</span> ${datosServicio.revisionRegulador}</div>` : ''}
-                            ${datosServicio?.revisionSistemaLuces ? `<div class="data-item"><span class="label">Luces:</span> ${datosServicio.revisionSistemaLuces}</div>` : ''}
-                            ${datosServicio?.focosEnMalEstado ? `<div class="data-item"><span class="label">Focos:</span> ${datosServicio.focosEnMalEstado}</div>` : ''}
-                            ${datosServicio?.fichasRecambio ? `<div class="data-item"><span class="label">Fichas:</span> ${datosServicio.fichasRecambio}</div>` : ''}
-                            ${datosServicio?.terminalesRecambio ? `<div class="data-item"><span class="label">Terminales:</span> ${datosServicio.terminalesRecambio}</div>` : ''}
-                            ${datosServicio?.revisionFugas ? `<div class="data-item"><span class="label">Fugas:</span> ${datosServicio.revisionFugas}</div>` : ''}
-                            ${datosServicio?.reparacionCablesDanados ? `<div class="data-item"><span class="label">Cables:</span> ${datosServicio.reparacionCablesDanados}</div>` : ''}
-                        </div>`
-                        : ''
-                    }
-
-                    <!-- TRANSMISION -->
-                    ${
-                        datosServicio?.cambioTransmision ||
-                        datosServicio?.reduccionCadena ||
-                        datosServicio?.cambioTornillosCorona ||
-                        datosServicio?.cantidadTornillos ||
-                        datosServicio?.cambioTacosMaza ||
-                        datosServicio?.lubricacionLimpieza
-                        ? `
-                        <div class="info-box">
-                            <h4>⚙️ Transmisión</h4>
-                            ${datosServicio?.cambioTransmision ? `<div class="data-item"><span class="label">Transmisión:</span> ${datosServicio.cambioTransmision}</div>` : ''}
-                            ${datosServicio?.reduccionCadena ? `<div class="data-item"><span class="label">Reducción Cadena:</span> ${datosServicio.reduccionCadena}</div>` : ''}
-                            ${datosServicio?.cambioTornillosCorona ? `<div class="data-item"><span class="label">Tornillos Corona:</span> ${datosServicio.cambioTornillosCorona}</div>` : ''}
-                            ${datosServicio?.cantidadTornillos ? `<div class="data-item"><span class="label">Cantidad Tornillos:</span> ${datosServicio.cantidadTornillos}</div>` : ''}
-                            ${datosServicio?.cambioTacosMaza ? `<div class="data-item"><span class="label">Tacos Maza:</span> ${datosServicio.cambioTacosMaza}</div>` : ''}
-                            ${datosServicio?.lubricacionLimpieza ? `<div class="data-item"><span class="label">Lubricación:</span> ${datosServicio.lubricacionLimpieza}</div>` : ''}
-                        </div>`
-                        : ''
-                    }
-
-                    <!-- FRENOS -->
-                    ${
-                        datosServicio?.mantenimientoZapatas ||
-                        datosServicio?.recambioDelanteras ||
-                        datosServicio?.recambioTraseras ||
-                        datosServicio?.recambioCable ||
-                        datosServicio?.mantenimientoDisco ||
-                        datosServicio?.recambioLiquido
-                        ? `
-                        <div class="info-box">
-                            <h4>🛑 Frenos</h4>
-                            ${datosServicio?.mantenimientoZapatas ? `<div class="data-item"><span class="label">Zapatas:</span> ${datosServicio.mantenimientoZapatas}</div>` : ''}
-                            ${datosServicio?.recambioDelanteras ? `<div class="data-item"><span class="label">Delanteras:</span> ${datosServicio.recambioDelanteras}</div>` : ''}
-                            ${datosServicio?.recambioTraseras ? `<div class="data-item"><span class="label">Traseras:</span> ${datosServicio.recambioTraseras}</div>` : ''}
-                            ${datosServicio?.recambioCable ? `<div class="data-item"><span class="label">Cable:</span> ${datosServicio.recambioCable}</div>` : ''}
-                            ${datosServicio?.mantenimientoDisco ? `<div class="data-item"><span class="label">Disco:</span> ${datosServicio.mantenimientoDisco}</div>` : ''}
-                            ${datosServicio?.recambioLiquido ? `<div class="data-item"><span class="label">Líquido:</span> ${datosServicio.recambioLiquido}</div>` : ''}
-                        </div>`
-                        : ''
-                    }
-
-                    <!-- OTROS -->
-                    ${datosServicio?.otros ? `
-                    <div class="info-box">
-                        <h4>📝 Otros</h4>
-                        <div class="data-item">${datosServicio.otros}</div>
-                    </div>` : ''}
-
-                ` : '<p style="color: #666; font-style: italic;">No hay ficha técnica registrada.</p>'}
+                ${fichaHTML}
             </div>
 
             <div class="footer">
