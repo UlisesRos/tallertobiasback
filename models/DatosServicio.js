@@ -1,183 +1,92 @@
-// Archivo: backend/models/DatosServicio.js
-
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
 const Cliente = require('./Cliente');
 
+const str = { type: DataTypes.STRING, allowNull: true, defaultValue: '' };
+const txt = { type: DataTypes.TEXT, allowNull: true, defaultValue: '' };
+
 const DatosServicio = sequelize.define('DatosServicio', {
-    id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true
-    },
-    // LUBRICADO Y FLUJO DE COMBUSTIBLE
-    cambioAceiteMotor: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    tipoAceite: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    cambioFiltroAceite: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    cambioFiltroAire: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    cambioFiltroCombustible: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    cambioMangueras: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+
+    // LUBRICADO
+    cambioAceite: str, tipoAceite: str, cambioFiltroAceite: str, marcaFiltroAceite: str,
+
+    // CARBURACION
+    cambioMangueras: str, cambioFiltroNafta: str, cambioBombaNafta: str, cambioFiltroAire: str,
+    limpiezaMantenimiento: str, cambioReparacion: str, cambioCarburador: str,
+
+    // CABEZAL
+    revisionAsientoValvulas: str, reparacionRecambioValvulas: str, registroValvulas: str, luzValvulas: str,
+    cambioBujia: str, tipoBujia: str, juntaEscape: str,
+    revisionCompresion: str, psiCompresion: str,
+    rectificacionCilindro: str, medidaCilindro: str, marcaCilindro: str,
+
+    // SISTEMA DE CLUCH
+    cambioDisco: str, marcaDiscos: str,
+    recambioCanasta: str,
+    revisionCentrifugo: str, recambioCentrifugoSimple: str, recambioEmbragueCentrifugo: str,
+    cambioJuntaTapaEmbrague: str,
+    revisionBombaAceite: str, recambioBombaAceite: str,
+
     // SISTEMA ELECTRICO
-    diagnosticoBateria: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    voltajeBateria: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    revisionRegulador: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    revisionSistemaLuces: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    focosEnMalEstado: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    fichasRecambio: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    terminalesRecambio: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    revisionFugas: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    reparacionCablesDanados: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    
-    // TRANSMISION
-    cambioTransmision: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    reduccionCadena: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    cambioTornillosCorona: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    cantidadTornillos: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    cambioTacosMaza: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    lubricacionLimpieza: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    
-    // FRENOS
-    mantenimientoZapatas: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    recambioDelanteras: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    recambioTraseras: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    recambioCable: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    otros: {
-        type: DataTypes.TEXT,
-        allowNull: true,
-        defaultValue: ''
-    },
-    
-    // MANTENIMIENTO DE DISCO
-    mantenimientoDisco: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    recambioLiquido: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: ''
-    },
-    
+    pruebaBateria: str, medicionBateria: str,
+    pruebaSistemaCarga: str, cambioRegulador: str, cambioBateria: str, cambioEstator: str,
+
+    // LUCES Y BOTONES
+    encendidoElectrico: str, cambioBoton: str, cambioRelaySolenoide: str, cambioBendix: str,
+    reparacionBendix: str, reparacionArrastreBurro: str,
+    reparacionProblemaElectrico: str, cualProblemaElectrico: str,
+    pruebaDeLuces: str, recambioFocos: str,
+    pruebaBotones: str, recambioBotones: str,
+    pruebaBocina: str,
+
+    // SISTEMA DE FRENOS
+    frenoDelantero: str,
+    recambioPastillasDelantera: str, recambioZapatasDelantera: str,
+    liquidoFrenoDelantero: str, bombaFrenoDelantera: str,
+    calisperFrenoDelantero: str, cableFrenoDelantero: str, otrosFrenoDelantero: str,
+    frenoTrasero: str,
+    recambioPastillasTrasera: str, recambioZapatasTrasera: str,
+    liquidoFrenoTrasero: str, bombaFrenoTrasera: str,
+    calisperFrenoTrasero: str, varrillaFrenoTrasero: str, otrosFrenoTrasero: str,
+
+    // SISTEMA DE ARRASTRE
+    recambioTransmisionCompleta: str, tipoTransmision: str,
+    registroLavadoLubricado: str, cambioTacosBujesMasa: str,
+    cambioEjeTrasero: str, cambioPortaCorona: str,
+    cambioTornillosSeguros: str,
+    cambioRulemanes: str, cualesRulemanes: str,
+
+    // RETENES Y ORING
+    cambioRetenes: str, cualesRetenes: str,
+    cambioOring: str, cualesOring: str,
+
+    // SISTEMA DE AMORTIGUACION
+    mantenimientoBarrasVastagos: str, cambioLiquidoHidraulico: str,
+    cambioResortes: str,
+    cambioRetenesSuspension: str, medidasRetenesSuspension: str,
+    cambioBolillerosDireccionales: str,
+    mantenimientoTraserAmortiguacion: str,
+    cambioBujesHorquillon: str, medidaBujesHorquillon: str,
+    cambioEjeHorquillon: str,
+    cambioBujesMonoshock: str, cambioMonoshock: str, cambioAmortiguadores: str,
+
+    // TABLERO
+    problemaElectricoTablero: str, cualProblemaTablero: str,
+    velocimetro: str, cambioRetorno: str, cambioCableTablero: str,
+
+    // OTROS
+    otrosTrabajos: txt,
+
     clienteId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        unique: true, // Esto asegura que solo haya un registro por cliente
-        references: {
-            model: Cliente,
-            key: 'id'
-        },
+        unique: true,
+        references: { model: Cliente, key: 'id' },
     }
 }, {
     tableName: 'datosservicios',
     timestamps: true,
-    indexes: [
-        {
-            unique: true,
-            fields: ['clienteId']
-        }
-    ]
 });
 
 Cliente.hasMany(DatosServicio, { foreignKey: 'clienteId' });

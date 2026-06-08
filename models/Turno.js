@@ -38,7 +38,12 @@ const Turno = sequelize.define('Turno', {
     recordatorioEnviado: {
         type: DataTypes.BOOLEAN,
         allowNull: true,
-        defaultValue: false // Para evitar enviar el mismo recordatorio dos veces
+        defaultValue: false
+    },
+    horario: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: ''
     }
 }, {
     tableName: 'turnos',
