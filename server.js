@@ -37,9 +37,76 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.DB_PORT || 5000;
+
+// Agrega columnas nuevas a datosservicios si aún no existen (migración segura e idempotente)
+const migrarColumnasServicio = async () => {
+    try {
+        const qi = sequelize.getQueryInterface();
+        const tabla = await qi.describeTable('datosservicios').catch(() => null);
+        if (!tabla) return; // la tabla no existe todavía, sync la crea después
+
+        const { DataTypes } = require('sequelize');
+        const str = { type: DataTypes.STRING, allowNull: true, defaultValue: '' };
+        const txt = { type: DataTypes.TEXT,   allowNull: true, defaultValue: '' };
+
+        const columnas = [
+            ['cambioAceite', str], ['tipoAceite', str], ['cambioFiltroAceite', str], ['marcaFiltroAceite', str],
+            ['cambioMangueras', str], ['cambioFiltroNafta', str], ['cambioBombaNafta', str], ['cambioFiltroAire', str],
+            ['limpiezaMantenimiento', str], ['cambioReparacion', str], ['cambioCarburador', str],
+            ['revisionAsientoValvulas', str], ['reparacionRecambioValvulas', str], ['registroValvulas', str], ['luzValvulas', str],
+            ['cambioBujia', str], ['tipoBujia', str], ['juntaEscape', str],
+            ['revisionCompresion', str], ['psiCompresion', str],
+            ['rectificacionCilindro', str], ['medidaCilindro', str], ['marcaCilindro', str],
+            ['cambioDisco', str], ['marcaDiscos', str], ['recambioCanasta', str],
+            ['revisionCentrifugo', str], ['recambioCentrifugoSimple', str], ['recambioEmbragueCentrifugo', str],
+            ['cambioJuntaTapaEmbrague', str], ['revisionBombaAceite', str], ['recambioBombaAceite', str],
+            ['pruebaBateria', str], ['medicionBateria', str],
+            ['pruebaSistemaCarga', str], ['cambioRegulador', str], ['cambioBateria', str], ['cambioEstator', str],
+            ['encendidoElectrico', str], ['cambioBoton', str], ['cambioRelaySolenoide', str], ['cambioBendix', str],
+            ['reparacionBendix', str], ['reparacionArrastreBurro', str],
+            ['reparacionProblemaElectrico', str], ['cualProblemaElectrico', str],
+            ['pruebaDeLuces', str], ['recambioFocos', str],
+            ['pruebaBotones', str], ['recambioBotones', str], ['pruebaBocina', str],
+            ['frenoDelantero', str],
+            ['recambioPastillasDelantera', str], ['recambioZapatasDelantera', str],
+            ['liquidoFrenoDelantero', str], ['bombaFrenoDelantera', str],
+            ['calisperFrenoDelantero', str], ['cableFrenoDelantero', str], ['otrosFrenoDelantero', str],
+            ['frenoTrasero', str],
+            ['recambioPastillasTrasera', str], ['recambioZapatasTrasera', str],
+            ['liquidoFrenoTrasero', str], ['bombaFrenoTrasera', str],
+            ['calisperFrenoTrasero', str], ['varrillaFrenoTrasero', str], ['otrosFrenoTrasero', str],
+            ['recambioTransmisionCompleta', str], ['tipoTransmision', str],
+            ['registroLavadoLubricado', str], ['cambioTacosBujesMasa', str],
+            ['cambioEjeTrasero', str], ['cambioPortaCorona', str], ['cambioTornillosSeguros', str],
+            ['cambioRulemanes', str], ['cualesRulemanes', str],
+            ['cambioRetenes', str], ['cualesRetenes', str],
+            ['cambioOring', str], ['cualesOring', str],
+            ['mantenimientoBarrasVastagos', str], ['cambioLiquidoHidraulico', str],
+            ['cambioResortes', str], ['cambioRetenesSuspension', str], ['medidasRetenesSuspension', str],
+            ['cambioBolillerosDireccionales', str], ['mantenimientoTraserAmortiguacion', str],
+            ['cambioBujesHorquillon', str], ['medidaBujesHorquillon', str], ['cambioEjeHorquillon', str],
+            ['cambioBujesMonoshock', str], ['cambioMonoshock', str], ['cambioAmortiguadores', str],
+            ['problemaElectricoTablero', str], ['cualProblemaTablero', str],
+            ['velocimetro', str], ['cambioRetorno', str], ['cambioCableTablero', str],
+            ['otrosTrabajos', txt],
+        ];
+
+        for (const [nombre, def] of columnas) {
+            if (!tabla[nombre]) {
+                await qi.addColumn('datosservicios', nombre, def);
+                console.log(`Columna agregada: ${nombre}`);
+            }
+        }
+        console.log('Migración de datosservicios completada');
+    } catch (err) {
+        console.error('Error en migración de columnas:', err.message);
+    }
+};
+
 // Sincronizar los modelos con la base de datos y luego iniciar el servidor.
 sequelize.sync()
-  .then(() => {
+  .then(async () => {
+    await migrarColumnasServicio();
     console.log('Base de datos Sincronizada');
     app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));
   })
