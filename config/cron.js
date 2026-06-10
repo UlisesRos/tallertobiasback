@@ -131,8 +131,9 @@ const recordatorioTurnosCron = () => {
         const nombre = turno.nombre || 'Cliente';
         const moto = turno.moto || (turno.dataValues?.moto) || '';
         const servicio = turno.descripcion || '';
+        const horarioStr = turno.horario ? `⏰ Horario: ${turno.horario} hs\n` : '';
 
-        const message = `Hola ${nombre}! 👋\nRecordatorio: mañana tenés turno en Taller Tobías.\n\n🛵 ${moto}\n🔧 ${servicio}\n📅 ${fechaFormateada}\n\nSi necesitás reprogramar respondé a este mensaje.\nTaller Tobías – ${process.env.WORKSHOP_PHONE || '3413632945'}`;
+        const message = `Hola ${nombre}! 👋\nRecordatorio: mañana tenés turno en Taller Tobías.\n\n🛵 ${moto}\n🔧 ${servicio}\n📅 ${fechaFormateada}\n${horarioStr}\nSi necesitás reprogramar respondé a este mensaje.\nTaller Tobías – ${process.env.WORKSHOP_PHONE || '3413632945'}`;
 
         try {
           await sendWhatsApp(toWhats, message);

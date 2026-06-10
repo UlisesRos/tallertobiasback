@@ -103,6 +103,7 @@ const migrarColumnasServicio = async () => {
     }
 };
 
+<<<<<<< HEAD
 // Agrega/ajusta columnas nuevas en servicios si aún no existen (migración segura e idempotente)
 const migrarTablaServicios = async () => {
     try {
@@ -123,6 +124,27 @@ const migrarTablaServicios = async () => {
         }
     } catch (err) {
         console.error('Error en migración de columnas de servicios:', err.message);
+=======
+const migrarColumnasTurnos = async () => {
+    try {
+        const qi = sequelize.getQueryInterface();
+        const tabla = await qi.describeTable('turnos').catch(() => null);
+        if (!tabla) return;
+
+        const { DataTypes } = require('sequelize');
+
+        if (!tabla['horario']) {
+            await qi.addColumn('turnos', 'horario', {
+                type: DataTypes.STRING,
+                allowNull: true,
+                defaultValue: ''
+            });
+            console.log('Columna horario agregada a turnos');
+        }
+        console.log('Migración de turnos completada');
+    } catch (err) {
+        console.error('Error en migración de columnas turnos:', err.message);
+>>>>>>> 0f1f86c8a16a3561c79404234a0d5d6c9e71e244
     }
 };
 
@@ -130,7 +152,11 @@ const migrarTablaServicios = async () => {
 sequelize.sync()
   .then(async () => {
     await migrarColumnasServicio();
+<<<<<<< HEAD
     await migrarTablaServicios();
+=======
+    await migrarColumnasTurnos();
+>>>>>>> 0f1f86c8a16a3561c79404234a0d5d6c9e71e244
     console.log('Base de datos Sincronizada');
     app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));
   })
