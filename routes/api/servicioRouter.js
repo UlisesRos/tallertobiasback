@@ -1,5 +1,5 @@
 const express = require('express');
-const { postServicio, getServicios, updateServicio, updateRepuestos, deleteRepuesto, updateMontoManoObra, updateMotoRepuesto } = require('../../controllers/ServiciosControllers');
+const { postServicio, getServicios, updateServicio, updateRepuestos, deleteRepuesto, updateMontoManoObra, updateMotoRepuesto, updateFechaEntrega, updateProximoServicio } = require('../../controllers/ServiciosControllers');
 
 const router = express.Router()
 
@@ -20,6 +20,12 @@ router.put('/updatemontomanoobra/:id', updateMontoManoObra)
 
 // Editar Monto Repuesto
 router.put('/updatemontorepuesto/:id', updateMotoRepuesto)
+
+// Editar Fecha de Entrega
+router.put('/updatefechaentrega/:id', updateFechaEntrega)
+
+// Editar datos del Proximo Servicio (dias, km, observaciones)
+router.put('/updateproximoservicio/:id', updateProximoServicio)
 
 
 module.exports = router;

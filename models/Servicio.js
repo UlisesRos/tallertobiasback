@@ -12,9 +12,14 @@ const Servicio = sequelize.define('Servicio', {
         type: DataTypes.STRING,
         allowNull: false
     },
+    fechaIngreso: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: ''
+    },
     fechaEntrega: {
         type: DataTypes.DATE,
-        allowNull: false
+        allowNull: true
     },
     montoManoObra: {
         type: DataTypes.FLOAT,

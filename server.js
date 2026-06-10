@@ -36,7 +36,7 @@ app.get('/', (req, res) => {
   res.send('Servidor funcionando correctamente.');
 });
 
-const PORT = process.env.DB_PORT || 5000;
+const PORT = /*process.env.DB_PORT || */5000;
 
 // Agrega columnas nuevas a datosservicios si aún no existen (migración segura e idempotente)
 const migrarColumnasServicio = async () => {
@@ -103,10 +103,34 @@ const migrarColumnasServicio = async () => {
     }
 };
 
+// Agrega/ajusta columnas nuevas en servicios si aún no existen (migración segura e idempotente)
+const migrarTablaServicios = async () => {
+    try {
+        const qi = sequelize.getQueryInterface();
+        const tabla = await qi.describeTable('servicios').catch(() => null);
+        if (!tabla) return; // la tabla no existe todavía, sync la crea después
+
+        const { DataTypes } = require('sequelize');
+
+        if (!tabla.fechaIngreso) {
+            await qi.addColumn('servicios', 'fechaIngreso', { type: DataTypes.STRING, allowNull: true, defaultValue: '' });
+            console.log('Columna agregada: fechaIngreso (servicios)');
+        }
+
+        if (tabla.fechaEntrega && tabla.fechaEntrega.allowNull === false) {
+            await qi.changeColumn('servicios', 'fechaEntrega', { type: DataTypes.DATE, allowNull: true });
+            console.log('Columna fechaEntrega ahora permite NULL (servicios)');
+        }
+    } catch (err) {
+        console.error('Error en migración de columnas de servicios:', err.message);
+    }
+};
+
 // Sincronizar los modelos con la base de datos y luego iniciar el servidor.
 sequelize.sync()
   .then(async () => {
     await migrarColumnasServicio();
+    await migrarTablaServicios();
     console.log('Base de datos Sincronizada');
     app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));
   })
