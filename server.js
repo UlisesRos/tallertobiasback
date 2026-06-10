@@ -36,7 +36,7 @@ app.get('/', (req, res) => {
   res.send('Servidor funcionando correctamente.');
 });
 
-const PORT = /*process.env.DB_PORT || */5000;
+const PORT = process.env.DB_PORT || 5000;
 
 // Agrega columnas nuevas a datosservicios si aún no existen (migración segura e idempotente)
 const migrarColumnasServicio = async () => {
