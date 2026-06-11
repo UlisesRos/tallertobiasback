@@ -1,38 +1,30 @@
 const Cliente = require('../models/Cliente');
 const Moto = require('../models/Moto');
-const Servicio = require('../models/Servicio')
+const Servicio = require('../models/Servicio');
+const DatosServicio = require('../models/DatosServicio');
 
 const registroCompleto = async (req, res) => {
     try {
+        // required: true => INNER JOIN: solo devuelve clientes con moto Y servicio,
+        // directamente desde SQL (más rápido que filtrar en memoria).
+        // IMPORTANTE: este endpoint ya NO borra clientes "incompletos". Hacerlo aquí
+        // eliminaba clientes a mitad del registro (cliente creado pero moto/servicio
+        // aún sin cargar) y rompía el alta de nuevos registros.
         const registros = await Cliente.findAll({
             include: [
                 {
                     model: Moto,
-                    required: false
+                    required: true
                 },
                 {
                     model: Servicio,
-                    required: false
+                    required: true
                 }
-            ]
+            ],
+            order: [['id', 'DESC']]
         });
 
-        // Filtramos los clientes que no tienen Moto o Servicio
-        const clientesIncompletos = registros.filter(
-            (cliente) => !cliente.Motos.length || !cliente.Servicios.length
-        );
-
-        // Elimina los clientes incompletos de la base de datos
-        for (const cliente of clientesIncompletos) {
-            await Cliente.destroy({ where: {id: cliente.id }})
-        }
-
-        // Devuelve solo los clientes completos 
-        const registrosCompletos = registros.filter(
-            (cliente) => cliente.Motos.length && cliente.Servicios.length
-        )
-
-        res.json(registrosCompletos)
+        res.json(registros)
     } catch (error) {
         console.error('Error al obtener los registros', error);
         res.status(500).json({ error: 'Error al obtener los registros' })
@@ -43,13 +35,13 @@ const deleteClienteCompleto = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Eliminar el Servicio del cliente asociado con el clienteId
+        // Eliminar todos los datos asociados al cliente antes de eliminarlo
+        // (la ficha técnica tiene FK hacia clientes: si no se borra primero,
+        // la eliminación del cliente falla)
+        await DatosServicio.destroy({ where: { clienteId: id }});
         await Servicio.destroy({ where: { clienteId: id }});
-
-        // Eliminar la Moto del cliente asociado con el clienteId
         await Moto.destroy({ where: { clienteId: id }});
 
-        // Finalmente eliminamos al cliente
         const cliente = await Cliente.destroy({ where: { id }});
 
         if(cliente){
@@ -57,10 +49,9 @@ const deleteClienteCompleto = async (req, res) => {
         } else {
             res.status(404).json({ error: 'Cliente no encontrado' })
         }
-        
-        console.log(id)
     } catch (error) {
-        res.status(500).json({ error: 'No se pudo eliminar al cliente:', error})
+        console.error('Error al eliminar el cliente', error);
+        res.status(500).json({ error: 'No se pudo eliminar al cliente' })
     }
 }
 

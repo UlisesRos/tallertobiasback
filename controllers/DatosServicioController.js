@@ -12,16 +12,13 @@ const crearOActualizarDatosServicio = async (req, res) => {
             });
         }
 
-        console.log('Buscando datos para clienteId:', clienteId); // Debug
-
         // Buscar si ya existen datos para este cliente específico
-        let datosServicio = await DatosServicio.findOne({ 
-            where: { clienteId: clienteId } 
+        let datosServicio = await DatosServicio.findOne({
+            where: { clienteId: clienteId }
         });
 
         if (datosServicio) {
             // Si existe, actualizar
-            console.log('Actualizando datos existentes para cliente:', clienteId);
             await datosServicio.update(req.body);
             res.status(200).json({ 
                 message: 'Datos del servicio actualizados correctamente',
@@ -29,7 +26,6 @@ const crearOActualizarDatosServicio = async (req, res) => {
             });
         } else {
             // Si no existe, crear nuevo
-            console.log('Creando nuevos datos para cliente:', clienteId);
             datosServicio = await DatosServicio.create(req.body);
             res.status(201).json({ 
                 message: 'Datos del servicio creados correctamente',

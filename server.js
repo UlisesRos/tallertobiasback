@@ -33,7 +33,7 @@ app.use('/', turnoRouter);
 
 // Ruta para verificar si el servidor esta en funcionamiento
 app.get('/', (req, res) => {
-  res.send('Servidor funcionando correctamente.');
+  res.send('Servidor funcionando correctamente. v2026-06-11');
 });
 
 const PORT = process.env.DB_PORT || 5000;

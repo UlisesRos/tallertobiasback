@@ -4,7 +4,9 @@ const { Op } = require('sequelize');
 // Agregar nuevo turno
 const postTurno = async (req, res) => {
     try {
-        const turno = await Turno.create(req.body)
+        // email vacío debe guardarse como null (un string vacío no pasa la validación isEmail)
+        const datos = { ...req.body, email: req.body.email || null };
+        const turno = await Turno.create(datos)
         res.status(201).json(turno)
     } catch (error) {
         res.status(400).json({ error: error.message })
